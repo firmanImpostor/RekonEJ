@@ -12,6 +12,7 @@
             --failed: #e74c3c;
             --stored: #27ae60;
             --taken: #3498db;
+            --replenish: #9b59b6;
         }
         
         body {
@@ -126,6 +127,9 @@
         #takenHeader {
             background-color: var(--taken);
         }
+        #replenishHeader {
+            background-color: var(--replenish);
+        }
         .keyword {
             display: inline-block;
             padding: 3px 8px;
@@ -151,6 +155,34 @@
             border-radius: 3px;
             font-weight: bold;
         }
+        .calculation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .calculation-table th, .calculation-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .calculation-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .calculation-table tr:last-child {
+            font-weight: bold;
+            background-color: #e9ecef;
+        }
+        .replenish-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 2px dashed var(--replenish);
+        }
     </style>
 </head>
 <body>
@@ -169,10 +201,12 @@
                 <li>Aplikasi akan mencari keyword: 
                     <span class="keyword">Host Store: Failed</span>, 
                     <span class="keyword">Host Store: Stored</span>, 
-                    <span class="keyword">Cash Taken</span>
+                    <span class="keyword">Cash Taken</span>,
+                    <span class="keyword">REPLENISHMENT</span>, dan
+                    <span class="keyword">INIT AMOUNT:</span>
                 </li>
-                <li>Untuk setiap keyword yang ditemukan, aplikasi akan mencari nilai <span class="keyword">AMOUNT</span> terdekat di atasnya</li>
-                <li>Contoh format amount: <span class="amount-example">AMOUNT : RP 300.000</span> atau <span class="amount-example">AMOUNT : RP 300,000</span></li>
+                <li>Untuk setiap keyword yang ditemukan, aplikasi akan mencari nilai amount terdekat</li>
+                <li>Contoh format amount: <span class="amount-example">AMOUNT : RP 300.000</span> atau <span class="amount-example">INIT AMOUNT: 450.000.000 IDR</span></li>
                 <li>Hasil rekonsiliasi akan menampilkan jumlah dan total nilai untuk setiap kategori</li>
             </ol>
         </div>
@@ -245,17 +279,88 @@
                     </div>
                 </div>
 
-                <div class="card mt-3">
+                <div class="card result-card">
+                    <div class="result-header" id="replenishHeader">
+                        <i class="fas fa-boxes me-2"></i>Replenishment
+                    </div>
+                    <div class="result-body">
+                        <div class="result-value" id="replenishTotal">Rp 0</div>
+                        <div class="result-count">Init Amount ditemukan</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculation Results -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Hasil Perhitungan Rekonsiliasi</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="calculation-table">
+                            <thead>
+                                <tr>
+                                    <th>Keterangan</th>
+                                    <th>Nilai</th>
+                                    <th>Keterangan Formula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Init Amount (dari Replenishment)</td>
+                                    <td id="calcInitAmount">Rp 0</td>
+                                    <td>Nilai awal dari INIT AMOUNT:</td>
+                                </tr>
+                                <tr>
+                                    <td>Host Store: Failed (Setor Tunai Gagal)</td>
+                                    <td id="calcFailed">+ Rp 0</td>
+                                    <td>Ditambahkan ke Init Amount</td>
+                                </tr>
+                                <tr>
+                                    <td>Host Store: Stored (Setor Tunai Berhasil)</td>
+                                    <td id="calcStored">+ Rp 0</td>
+                                    <td>Ditambahkan ke Init Amount</td>
+                                </tr>
+                                <tr>
+                                    <td>Cash Taken (Tarik Tunai)</td>
+                                    <td id="calcTaken">- Rp 0</td>
+                                    <td>Dikurangkan dari Init Amount</td>
+                                </tr>
+                                <tr>
+                                    <td>Hasil Rekonsiliasi</td>
+                                    <td id="calcResult">Rp 0</td>
+                                    <td>Init Amount + Failed + Stored - Taken</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="replenish-result">
+                            <i class="fas fa-check-circle me-2 text-success"></i>
+                            <span>Hasil Akhir Rekonsiliasi: </span>
+                            <span id="finalResult">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Details -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-header bg-secondary text-white">
                         <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detail Transaksi</h5>
                     </div>
                     <div class="card-body">
-                        <div class="table-container" style="max-height: 200px; overflow-y: auto;">
-                            <table class="table table-sm">
+                        <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-sm table-striped">
                                 <thead>
                                     <tr>
                                         <th>Jenis</th>
                                         <th>File</th>
+                                        <th>Line</th>
                                         <th>Amount</th>
                                     </tr>
                                 </thead>
@@ -266,15 +371,20 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <button id="exportBtn" class="btn btn-outline-hitachi w-100 mt-3 d-none">
+        <!-- Action Buttons -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <button id="exportBtn" class="btn btn-hitachi w-100 d-none">
                     <i class="fas fa-download me-2"></i>Export Hasil ke CSV
                 </button>
             </div>
         </div>
 
         <!-- Footer -->
-        <div class="footer">
+        <div class="footer mt-4">
             <p class="mb-0">Aplikasi Rekon CRM Hitachi &copy; 2023 - Hosting dengan GitHub Pages</p>
         </div>
     </div>
@@ -297,13 +407,23 @@
             const storedCount = document.getElementById('storedCount');
             const takenTotal = document.getElementById('takenTotal');
             const takenCount = document.getElementById('takenCount');
+            const replenishTotal = document.getElementById('replenishTotal');
+            
+            const calcInitAmount = document.getElementById('calcInitAmount');
+            const calcFailed = document.getElementById('calcFailed');
+            const calcStored = document.getElementById('calcStored');
+            const calcTaken = document.getElementById('calcTaken');
+            const calcResult = document.getElementById('calcResult');
+            const finalResult = document.getElementById('finalResult');
+            
             const transactionDetails = document.getElementById('transactionDetails');
             
             let uploadedFiles = [];
             let results = {
                 failed: { total: 0, count: 0, transactions: [] },
                 stored: { total: 0, count: 0, transactions: [] },
-                taken: { total: 0, count: 0, transactions: [] }
+                taken: { total: 0, count: 0, transactions: [] },
+                replenish: { total: 0, count: 0, transactions: [] }
             };
             
             // Upload area functionality
@@ -372,7 +492,8 @@
                 results = {
                     failed: { total: 0, count: 0, transactions: [] },
                     stored: { total: 0, count: 0, transactions: [] },
-                    taken: { total: 0, count: 0, transactions: [] }
+                    taken: { total: 0, count: 0, transactions: [] },
+                    replenish: { total: 0, count: 0, transactions: [] }
                 };
                 
                 // Show progress bar
@@ -410,7 +531,8 @@
                 const keywords = [
                     { key: 'failed', pattern: 'Host Store: Failed' },
                     { key: 'stored', pattern: 'Host Store: Stored' },
-                    { key: 'taken', pattern: 'Cash Taken' }
+                    { key: 'taken', pattern: 'Cash Taken' },
+                    { key: 'replenish', pattern: 'REPLENISHMENT' }
                 ];
                 
                 // Process each line
@@ -420,8 +542,16 @@
                     // Check if line contains any keyword
                     for (const keyword of keywords) {
                         if (line.includes(keyword.pattern)) {
-                            // Look for AMOUNT above this line
-                            const amount = findAmountAbove(lines, i);
+                            let amount = null;
+                            
+                            if (keyword.key === 'replenish') {
+                                // For REPLENISHMENT, look for INIT AMOUNT below
+                                amount = findInitAmountBelow(lines, i);
+                            } else {
+                                // For other keywords, look for AMOUNT above
+                                amount = findAmountAbove(lines, i);
+                            }
+                            
                             if (amount) {
                                 results[keyword.key].count++;
                                 results[keyword.key].total += amount;
@@ -454,6 +584,23 @@
                 return null;
             }
             
+            // Find INIT AMOUNT value below the REPLENISHMENT line
+            function findInitAmountBelow(lines, currentLine) {
+                // Search downwards from current line
+                for (let i = currentLine + 1; i < lines.length && i <= currentLine + 20; i++) {
+                    if (lines[i].includes('INIT AMOUNT:')) {
+                        // Extract numeric value from amount line
+                        const amountMatch = lines[i].match(/(\d[\d.,]*)/);
+                        if (amountMatch) {
+                            // Clean and convert the amount
+                            const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
+                            return parseInt(amountStr, 10);
+                        }
+                    }
+                }
+                return null;
+            }
+            
             // Display results
             function displayResults() {
                 // Update totals
@@ -466,8 +613,26 @@
                 takenTotal.textContent = formatCurrency(results.taken.total);
                 takenCount.textContent = `${results.taken.count} transaksi`;
                 
+                replenishTotal.textContent = formatCurrency(results.replenish.total);
+                
+                // Update calculation table
+                calcInitAmount.textContent = formatCurrency(results.replenish.total);
+                calcFailed.textContent = `+ ${formatCurrency(results.failed.total)}`;
+                calcStored.textContent = `+ ${formatCurrency(results.stored.total)}`;
+                calcTaken.textContent = `- ${formatCurrency(results.taken.total)}`;
+                
+                // Calculate final result
+                const finalAmount = results.replenish.total + results.failed.total + results.stored.total - results.taken.total;
+                calcResult.textContent = formatCurrency(finalAmount);
+                finalResult.textContent = formatCurrency(finalAmount);
+                
                 // Update transaction details
                 transactionDetails.innerHTML = '';
+                
+                // Add replenishment transactions
+                results.replenish.transactions.forEach(trans => {
+                    addTransactionRow('replenish', trans.file, trans.amount, trans.line);
+                });
                 
                 // Add failed transactions
                 results.failed.transactions.forEach(trans => {
@@ -496,11 +661,14 @@
                     typeBadge = '<span class="badge bg-success">Stored</span>';
                 } else if (type === 'taken') {
                     typeBadge = '<span class="badge bg-primary">Taken</span>';
+                } else if (type === 'replenish') {
+                    typeBadge = '<span class="badge bg-purple">Replenish</span>';
                 }
                 
                 row.innerHTML = `
                     <td>${typeBadge}</td>
-                    <td>${file} (line: ${line})</td>
+                    <td>${file}</td>
+                    <td>${line}</td>
                     <td>${formatCurrency(amount)}</td>
                 `;
                 
@@ -510,6 +678,11 @@
             // Export results to CSV
             function exportResults() {
                 let csvContent = 'Jenis,File,Line,Amount\n';
+                
+                // Add replenishment transactions
+                results.replenish.transactions.forEach(trans => {
+                    csvContent += `REPLENISHMENT,${trans.file},${trans.line},${trans.amount}\n`;
+                });
                 
                 // Add failed transactions
                 results.failed.transactions.forEach(trans => {
@@ -528,9 +701,11 @@
                 
                 // Add summary
                 csvContent += '\n';
+                csvContent += `REPLENISHMENT Total,,,${results.replenish.total}\n`;
                 csvContent += `Host Store: Failed Total,,,${results.failed.total}\n`;
                 csvContent += `Host Store: Stored Total,,,${results.stored.total}\n`;
                 csvContent += `Cash Taken Total,,,${results.taken.total}\n`;
+                csvContent += `Final Result,,,${results.replenish.total + results.failed.total + results.stored.total - results.taken.total}\n`;
                 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
