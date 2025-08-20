@@ -211,6 +211,13 @@
             max-height: 300px;
             overflow-y: auto;
         }
+        .note-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 0 5px 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -237,6 +244,9 @@
                 <li>Contoh format amount: <span class="amount-example">AMOUNT : RP 300.000</span> atau <span class="amount-example">INIT AMOUNT: 450.000.000 IDR</span></li>
                 <li>Hasil rekonsiliasi akan menampilkan jumlah dan total nilai untuk setiap kategori</li>
             </ol>
+            <div class="note-box">
+                <strong>Catatan:</strong> Hanya REPLENISHMENT pertama yang ditemukan yang akan diproses, nilai lainnya diabaikan.
+            </div>
         </div>
 
         <div class="row">
@@ -351,7 +361,7 @@
                                 <tr>
                                     <td>Init Amount (dari Replenishment)</td>
                                     <td id="calcInitAmount">Rp 0</td>
-                                    <td>Nilai awal dari INIT AMOUNT:</td>
+                                    <td>Nilai awal dari INIT AMOUNT: (hanya yang pertama)</td>
                                 </tr>
                                 <tr>
                                     <td>Host Store: Failed (Setor Tunai Gagal)</td>
@@ -602,7 +612,7 @@
                 const lines = content.split('\n');
                 let debugContent = '';
                 
-                // Process REPLENISHMENT first (only once per file)
+                // Process REPLENISHMENT first (only the first one found)
                 let replenishFound = false;
                 
                 for (let i = 0; i < lines.length; i++) {
@@ -617,15 +627,16 @@
                                 const amountInfo = extractInitAmountFromLine(lines[j]);
                                 if (amountInfo) {
                                     debugContent += `✓ Ditemukan INIT AMOUNT di baris ${j+1}: ${amountInfo.amountRaw} → ${formatCurrency(amountInfo.amount)}\n`;
-                                    results.replenish.count++;
-                                    results.replenish.total += amountInfo.amount;
-                                    results.replenish.transactions.push({
+                                    results.replenish.count = 1; // Hanya hitung 1
+                                    results.replenish.total = amountInfo.amount; // Hanya ambil nilai pertama
+                                    results.replenish.transactions = [{
                                         file: fileName,
                                         amount: amountInfo.amount,
                                         line: i + 1,
                                         initAmountLine: j + 1
-                                    });
+                                    }];
                                     replenishFound = true;
+                                    debugContent += `✓ Mengambil nilai REPLENISHMENT pertama: ${formatCurrency(amountInfo.amount)}\n`;
                                     break;
                                 }
                             }
@@ -634,7 +645,15 @@
                         if (!replenishFound) {
                             debugContent += `✗ INIT AMOUNT tidak ditemukan setelah REPLENISHMENT\n`;
                         }
+                        
+                        // Hentikan pencarian REPLENISHMENT setelah menemukan yang pertama
+                        break;
                     }
+                }
+                
+                // Process other keywords (Host Store: Failed, Host Store: Stored, Cash Taken)
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
                     
                     if (line.includes('Host Store: Failed')) {
                         const amount = findAmountAbove(lines, i);
@@ -781,7 +800,7 @@
                 // Update transaction details
                 transactionDetails.innerHTML = '';
                 
-                // Add replenishment transactions
+                // Add replenishment transactions (only the first one)
                 results.replenish.transactions.forEach(trans => {
                     addTransactionRow('replenish', trans.file, trans.amount, trans.line, trans.initAmountLine);
                 });
@@ -803,7 +822,7 @@
                 
                 // Update debug info with final results
                 debugInfo.textContent += `\n=== HASIL AKHIR ===\n`;
-                debugInfo.textContent += `Replenishment: ${formatCurrency(results.replenish.total)}\n`;
+                debugInfo.textContent += `Replenishment: ${formatCurrency(results.replenish.total)} (hanya nilai pertama)\n`;
                 debugInfo.textContent += `Host Store Failed: ${formatCurrency(results.failed.total)}\n`;
                 debugInfo.textContent += `Host Store Stored: ${formatCurrency(results.stored.total)}\n`;
                 debugInfo.textContent += `Cash Taken: ${formatCurrency(results.taken.total)}\n`;
@@ -841,7 +860,7 @@
             function exportResults() {
                 let csvContent = 'Jenis,File,Line,Amount\n';
                 
-                // Add replenishment transactions
+                // Add replenishment transactions (only the first one)
                 results.replenish.transactions.forEach(trans => {
                     csvContent += `REPLENISHMENT,${trans.file},${trans.line},${trans.amount}\n`;
                 });
