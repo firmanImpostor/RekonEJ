@@ -13,6 +13,8 @@
             --stored: #27ae60;
             --taken: #3498db;
             --replenish: #9b59b6;
+            --denom50: #f39c12;
+            --denom100: #8e44ad;
         }
         
         body {
@@ -130,6 +132,12 @@
         #replenishHeader {
             background-color: var(--replenish);
         }
+        #denom50Header {
+            background-color: var(--denom50);
+        }
+        #denom100Header {
+            background-color: var(--denom100);
+        }
         .keyword {
             display: inline-block;
             padding: 3px 8px;
@@ -218,6 +226,19 @@
             margin-top: 10px;
             border-radius: 0 5px 5px 0;
         }
+        .denom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .denom-table th, .denom-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .denom-table th {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -237,8 +258,10 @@
                     <span class="keyword">Host Store: Failed</span>, 
                     <span class="keyword">Host Store: Stored</span>, 
                     <span class="keyword">Cash Taken</span>,
-                    <span class="keyword">REPLENISHMENT</span>, dan
-                    <span class="keyword">INIT AMOUNT:</span>
+                    <span class="keyword">REPLENISHMENT</span>,
+                    <span class="keyword">INIT AMOUNT:</span>,
+                    <span class="keyword">Stored Count</span>, dan
+                    <span class="keyword">Dispense Count</span>
                 </li>
                 <li>Untuk setiap keyword yang ditemukan, aplikasi akan mencari nilai amount terdekat</li>
                 <li>Contoh format amount: <span class="amount-example">AMOUNT : RP 300.000</span> atau <span class="amount-example">INIT AMOUNT: 450.000.000 IDR</span></li>
@@ -336,6 +359,63 @@
                     <div class="result-body">
                         <div class="result-value" id="replenishTotal">Rp 0</div>
                         <div class="result-count" id="replenishCount">Init Amount ditemukan</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Denom Results -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card result-card">
+                    <div class="result-header" id="denom50Header">
+                        <i class="fas fa-money-bill me-2"></i>Denom 50,000 (Lembar)
+                    </div>
+                    <div class="result-body">
+                        <div class="result-value" id="denom50Total">0</div>
+                        <div class="result-count" id="denom50Count">0 lembar</div>
+                        
+                        <table class="denom-table">
+                            <tr>
+                                <th>Sumber</th>
+                                <th>Lembar</th>
+                            </tr>
+                            <tr>
+                                <td>Stored Count</td>
+                                <td id="denom50Stored">0</td>
+                            </tr>
+                            <tr>
+                                <td>Dispense Count</td>
+                                <td id="denom50Dispense">0</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card result-card">
+                    <div class="result-header" id="denom100Header">
+                        <i class="fas fa-money-bill me-2"></i>Denom 100,000 (Lembar)
+                    </div>
+                    <div class="result-body">
+                        <div class="result-value" id="denom100Total">0</div>
+                        <div class="result-count" id="denom100Count">0 lembar</div>
+                        
+                        <table class="denom-table">
+                            <tr>
+                                <th>Sumber</th>
+                                <th>Lembar</th>
+                            </tr>
+                            <tr>
+                                <td>Stored Count</td>
+                                <td id="denom100Stored">0</td>
+                            </tr>
+                            <tr>
+                                <td>Dispense Count</td>
+                                <td id="denom100Dispense">0</td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -479,6 +559,16 @@
             const replenishTotal = document.getElementById('replenishTotal');
             const replenishCount = document.getElementById('replenishCount');
             
+            const denom50Total = document.getElementById('denom50Total');
+            const denom50Count = document.getElementById('denom50Count');
+            const denom50Stored = document.getElementById('denom50Stored');
+            const denom50Dispense = document.getElementById('denom50Dispense');
+            
+            const denom100Total = document.getElementById('denom100Total');
+            const denom100Count = document.getElementById('denom100Count');
+            const denom100Stored = document.getElementById('denom100Stored');
+            const denom100Dispense = document.getElementById('denom100Dispense');
+            
             const calcInitAmount = document.getElementById('calcInitAmount');
             const calcFailed = document.getElementById('calcFailed');
             const calcStored = document.getElementById('calcStored');
@@ -493,7 +583,13 @@
                 failed: { total: 0, count: 0, transactions: [] },
                 stored: { total: 0, count: 0, transactions: [] },
                 taken: { total: 0, count: 0, transactions: [] },
-                replenish: { total: 0, count: 0, transactions: [] }
+                replenish: { total: 0, count: 0, transactions: [] },
+                denom: {
+                    stored50: 0,
+                    stored100: 0,
+                    dispense50: 0,
+                    dispense100: 0
+                }
             };
             
             // Upload area functionality
@@ -573,7 +669,13 @@
                     failed: { total: 0, count: 0, transactions: [] },
                     stored: { total: 0, count: 0, transactions: [] },
                     taken: { total: 0, count: 0, transactions: [] },
-                    replenish: { total: 0, count: 0, transactions: [] }
+                    replenish: { total: 0, count: 0, transactions: [] },
+                    denom: {
+                        stored50: 0,
+                        stored100: 0,
+                        dispense50: 0,
+                        dispense100: 0
+                    }
                 };
                 
                 // Show progress bar
@@ -693,8 +795,67 @@
                     }
                 }
                 
+                // Process Stored Count and Dispense Count for denomination counting
+                processDenomCounts(lines, fileName, debugContent);
+                
                 // Update debug info
                 debugInfo.textContent += debugContent;
+            }
+            
+            // Process Stored Count and Dispense Count for denomination counting
+            function processDenomCounts(lines, fileName, debugContent) {
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    
+                    // Process Stored Count
+                    if (line.includes('Stored Count')) {
+                        debugContent += `✓ Ditemukan Stored Count di baris ${i+1}\n`;
+                        
+                        // Look for denomination data before [Jpr contents]
+                        for (let j = i + 1; j < lines.length; j++) {
+                            if (lines[j].includes('[Jpr contents]')) {
+                                break; // Stop when we reach [Jpr contents]
+                            }
+                            
+                            // Check for denomination patterns like [50000, X] or [100000, X]
+                            const denomMatch = lines[j].match(/\[(\d+),\s*(\d+)\]/);
+                            if (denomMatch) {
+                                const denomValue = parseInt(denomMatch[1], 10);
+                                const denomCount = parseInt(denomMatch[2], 10);
+                                
+                                if (denomValue === 50000) {
+                                    results.denom.stored50 += denomCount;
+                                    debugContent += `✓ Denom 50,000: ${denomCount} lembar\n`;
+                                } else if (denomValue === 100000) {
+                                    results.denom.stored100 += denomCount;
+                                    debugContent += `✓ Denom 100,000: ${denomCount} lembar\n`;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Process Dispense Count
+                    if (line.includes('Dispense Count')) {
+                        debugContent += `✓ Ditemukan Dispense Count di baris ${i+1}\n`;
+                        
+                        // Look for pattern like [X,X,X,X] after Dispense Count
+                        const dispenseMatch = line.match(/Dispense Count\s+\[(\d+),(\d+),(\d+),(\d+)\]/);
+                        if (dispenseMatch) {
+                            const count1 = parseInt(dispenseMatch[1], 10);
+                            const count2 = parseInt(dispenseMatch[2], 10);
+                            const count3 = parseInt(dispenseMatch[3], 10);
+                            const count4 = parseInt(dispenseMatch[4], 10);
+                            
+                            // First two values are for 100,000 denomination
+                            results.denom.dispense100 += (count1 + count2);
+                            
+                            // Last two values are for 50,000 denomination
+                            results.denom.dispense50 += (count3 + count4);
+                            
+                            debugContent += `✓ Dispense Count: 100,000=${count1 + count2} lembar, 50,000=${count3 + count4} lembar\n`;
+                        }
+                    }
+                }
             }
             
             // Find AMOUNT value above the current line
@@ -786,6 +947,20 @@
                 replenishTotal.textContent = formatCurrency(results.replenish.total);
                 replenishCount.textContent = `${results.replenish.count} Init Amount ditemukan`;
                 
+                // Update denomination results
+                const totalDenom50 = results.denom.stored50 + results.denom.dispense50;
+                const totalDenom100 = results.denom.stored100 + results.denom.dispense100;
+                
+                denom50Total.textContent = totalDenom50;
+                denom50Count.textContent = `${totalDenom50} lembar`;
+                denom50Stored.textContent = results.denom.stored50;
+                denom50Dispense.textContent = results.denom.dispense50;
+                
+                denom100Total.textContent = totalDenom100;
+                denom100Count.textContent = `${totalDenom100} lembar`;
+                denom100Stored.textContent = results.denom.stored100;
+                denom100Dispense.textContent = results.denom.dispense100;
+                
                 // Update calculation table
                 calcInitAmount.textContent = formatCurrency(results.replenish.total);
                 calcFailed.textContent = `+ ${formatCurrency(results.failed.total)}`;
@@ -826,6 +1001,8 @@
                 debugInfo.textContent += `Host Store Failed: ${formatCurrency(results.failed.total)}\n`;
                 debugInfo.textContent += `Host Store Stored: ${formatCurrency(results.stored.total)}\n`;
                 debugInfo.textContent += `Cash Taken: ${formatCurrency(results.taken.total)}\n`;
+                debugInfo.textContent += `Denom 50,000: ${totalDenom50} lembar (Stored: ${results.denom.stored50}, Dispense: ${results.denom.dispense50})\n`;
+                debugInfo.textContent += `Denom 100,000: ${totalDenom100} lembar (Stored: ${results.denom.stored100}, Dispense: ${results.denom.dispense100})\n`;
                 debugInfo.textContent += `Hasil Rekonsiliasi: ${formatCurrency(finalAmount)}\n`;
             }
             
@@ -879,6 +1056,14 @@
                 results.taken.transactions.forEach(trans => {
                     csvContent += `Cash Taken,${trans.file},${trans.line},${trans.amount}\n`;
                 });
+                
+                // Add denomination summary
+                csvContent += '\n';
+                csvContent += 'DENOMINATION SUMMARY\n';
+                csvContent += 'Type,Denom 50,000,Denom 100,000\n';
+                csvContent += `Stored Count,${results.denom.stored50},${results.denom.stored100}\n`;
+                csvContent += `Dispense Count,${results.denom.dispense50},${results.denom.dispense100}\n`;
+                csvContent += `Total,${results.denom.stored50 + results.denom.dispense50},${results.denom.stored100 + results.denom.dispense100}\n`;
                 
                 // Add summary
                 csvContent += '\n';
