@@ -911,13 +911,16 @@
                         const cassette = cassetteMatch[1];
                         const denomValue = parseInt(cassetteMatch[2], 10);
                         const denomCount = parseInt(cassetteMatch[3], 10);
+
                         
                         debugContent += `✓ Ditemukan ${cassette}: Denom ${denomValue}, Count ${denomCount}\n`;
                         
+                        const dividedCount = Math.floor(denomCount / 2);
+                        
                         if (denomValue === 50000) {
-                            results.denom.replenish50 += denomCount;
+                            results.denom.replenish50 += dividedCount;
                         } else if (denomValue === 100000) {
-                            results.denom.replenish100 += denomCount;
+                            results.denom.replenish100 += dividedCount;
                         }
                     }
                 }
@@ -1202,7 +1205,7 @@
                 csvContent += '\n';
                 csvContent += 'DENOMINATION SUMMARY\n';
                 csvContent += 'Type,Denom 50,000,Denom 100,000\n';
-                csvContent += `Replenish Lembar,${results.denom.replenish50/2},${results.denom.replenish100/2}\n`;
+                csvContent += `Replenish Lembar,${results.denom.replenish50},${results.denom.replenish100}\n`;
                 csvContent += `Stored Count,${results.denom.stored50},${results.denom.stored100}\n`;
                 csvContent += `Dispense Count,${results.denom.dispense50},${results.denom.dispense100}\n`;
                 csvContent += `Sisa Lembar,${results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50},${results.denom.replenish100 + results.denom.stored100 - results.denom.dispense100}\n`;
