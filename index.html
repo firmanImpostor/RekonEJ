@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekon CRM Hitachi</title>
+    <title>Aplikasi Rekon CRM Hitachi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -183,6 +183,9 @@
             border-radius: 8px;
             border: 2px dashed var(--replenish);
         }
+        .bg-purple {
+            background-color: var(--replenish) !important;
+        }
     </style>
 </head>
 <body>
@@ -285,7 +288,7 @@
                     </div>
                     <div class="result-body">
                         <div class="result-value" id="replenishTotal">Rp 0</div>
-                        <div class="result-count">Init Amount ditemukan</div>
+                        <div class="result-count" id="replenishCount">Init Amount ditemukan</div>
                     </div>
                 </div>
             </div>
@@ -385,7 +388,7 @@
 
         <!-- Footer -->
         <div class="footer mt-4">
-            <p class="mb-0">Fredericksimarmata@gmail.com &copy;2025 Frederick Simarmata</p>
+            <p class="mb-0">Aplikasi Rekon CRM Hitachi &copy; 2023 - Hosting dengan GitHub Pages</p>
         </div>
     </div>
 
@@ -408,6 +411,7 @@
             const takenTotal = document.getElementById('takenTotal');
             const takenCount = document.getElementById('takenCount');
             const replenishTotal = document.getElementById('replenishTotal');
+            const replenishCount = document.getElementById('replenishCount');
             
             const calcInitAmount = document.getElementById('calcInitAmount');
             const calcFailed = document.getElementById('calcFailed');
@@ -527,41 +531,63 @@
             function processFileContent(content, fileName) {
                 const lines = content.split('\n');
                 
-                // Keywords to search for
-                const keywords = [
-                    { key: 'failed', pattern: 'Host Store: Failed' },
-                    { key: 'stored', pattern: 'Host Store: Stored' },
-                    { key: 'taken', pattern: 'Cash Taken' },
-                    { key: 'replenish', pattern: 'REPLENISHMENT' }
-                ];
+                // Process REPLENISHMENT first
+                for (let i = 0; i < lines.length; i++) {
+                    if (lines[i].includes('REPLENISHMENT')) {
+                        // For REPLENISHMENT, look for INIT AMOUNT below
+                        const amount = findInitAmountBelow(lines, i);
+                        if (amount !== null) {
+                            results.replenish.count++;
+                            results.replenish.total += amount;
+                            results.replenish.transactions.push({
+                                file: fileName,
+                                amount: amount,
+                                line: i + 1
+                            });
+                            // Only process the first REPLENISHMENT found
+                            break;
+                        }
+                    }
+                }
                 
-                // Process each line
+                // Process other keywords
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
                     
-                    // Check if line contains any keyword
-                    for (const keyword of keywords) {
-                        if (line.includes(keyword.pattern)) {
-                            let amount = null;
-                            
-                            if (keyword.key === 'replenish') {
-                                // For REPLENISHMENT, look for INIT AMOUNT below
-                                amount = findInitAmountBelow(lines, i);
-                            } else {
-                                // For other keywords, look for AMOUNT above
-                                amount = findAmountAbove(lines, i);
-                            }
-                            
-                            if (amount) {
-                                results[keyword.key].count++;
-                                results[keyword.key].total += amount;
-                                results[keyword.key].transactions.push({
-                                    file: fileName,
-                                    amount: amount,
-                                    line: i + 1
-                                });
-                            }
-                            break; // Move to next line after finding a keyword
+                    if (line.includes('Host Store: Failed')) {
+                        const amount = findAmountAbove(lines, i);
+                        if (amount !== null) {
+                            results.failed.count++;
+                            results.failed.total += amount;
+                            results.failed.transactions.push({
+                                file: fileName,
+                                amount: amount,
+                                line: i + 1
+                            });
+                        }
+                    }
+                    else if (line.includes('Host Store: Stored')) {
+                        const amount = findAmountAbove(lines, i);
+                        if (amount !== null) {
+                            results.stored.count++;
+                            results.stored.total += amount;
+                            results.stored.transactions.push({
+                                file: fileName,
+                                amount: amount,
+                                line: i + 1
+                            });
+                        }
+                    }
+                    else if (line.includes('Cash Taken')) {
+                        const amount = findAmountAbove(lines, i);
+                        if (amount !== null) {
+                            results.taken.count++;
+                            results.taken.total += amount;
+                            results.taken.transactions.push({
+                                file: fileName,
+                                amount: amount,
+                                line: i + 1
+                            });
                         }
                     }
                 }
@@ -573,12 +599,7 @@
                 for (let i = currentLine - 1; i >= 0 && i >= currentLine - 10; i--) {
                     if (lines[i].includes('AMOUNT')) {
                         // Extract numeric value from amount line
-                        const amountMatch = lines[i].match(/(\d[\d.,]*)/);
-                        if (amountMatch) {
-                            // Clean and convert the amount
-                            const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
-                            return parseInt(amountStr, 10);
-                        }
+                        return extractAmountFromLine(lines[i]);
                     }
                 }
                 return null;
@@ -590,13 +611,21 @@
                 for (let i = currentLine + 1; i < lines.length && i <= currentLine + 20; i++) {
                     if (lines[i].includes('INIT AMOUNT:')) {
                         // Extract numeric value from amount line
-                        const amountMatch = lines[i].match(/(\d[\d.,]*)/);
-                        if (amountMatch) {
-                            // Clean and convert the amount
-                            const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
-                            return parseInt(amountStr, 10);
-                        }
+                        return extractAmountFromLine(lines[i]);
                     }
+                }
+                return null;
+            }
+            
+            // Extract amount from a line containing amount information
+            function extractAmountFromLine(line) {
+                // Match numbers with optional dots/commas as thousand separators
+                const amountMatch = line.match(/(\d[\d.,]*)/);
+                if (amountMatch) {
+                    // Clean and convert the amount
+                    const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
+                    const amount = parseInt(amountStr, 10);
+                    return isNaN(amount) ? null : amount;
                 }
                 return null;
             }
@@ -614,6 +643,7 @@
                 takenCount.textContent = `${results.taken.count} transaksi`;
                 
                 replenishTotal.textContent = formatCurrency(results.replenish.total);
+                replenishCount.textContent = `${results.replenish.count} Init Amount ditemukan`;
                 
                 // Update calculation table
                 calcInitAmount.textContent = formatCurrency(results.replenish.total);
