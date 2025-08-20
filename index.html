@@ -159,9 +159,10 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-size: 0.9rem;
         }
         .calculation-table th, .calculation-table td {
-            padding: 12px;
+            padding: 10px;
             text-align: left;
             border-bottom: 1px solid #dee2e6;
         }
@@ -193,7 +194,22 @@
             border-radius: 5px;
             border-left: 3px solid #e74c3c;
             margin-top: 10px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .file-content {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -255,6 +271,18 @@
                         <button id="processBtn" class="btn btn-hitachi w-100 mt-3 d-none">
                             <i class="fas fa-cogs me-2"></i>Proses Rekonsiliasi
                         </button>
+                    </div>
+                </div>
+                
+                <!-- File Content Preview -->
+                <div class="card mt-4 d-none" id="filePreviewCard">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Pratinjau File</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="filePreview" class="file-content">
+                            <!-- File content will be populated here -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -386,8 +414,8 @@
             </div>
         </div>
 
-        <!-- Debug Info (akan dihapus di production) -->
-        <div class="row mt-4 d-none" id="debugSection">
+        <!-- Debug Info -->
+        <div class="row mt-4">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-warning text-dark">
@@ -395,7 +423,7 @@
                     </div>
                     <div class="card-body">
                         <div id="debugInfo" class="debug-info">
-                            <!-- Debug information will be populated here -->
+                            Debug information will appear here after processing...
                         </div>
                     </div>
                 </div>
@@ -413,7 +441,7 @@
 
         <!-- Footer -->
         <div class="footer mt-4">
-            <p class="mb-0">Frederick &copy; 2025 - Frederick Simarmata</p>
+            <p class="mb-0">Aplikasi Rekon CRM Hitachi &copy; 2023 - Hosting dengan GitHub Pages</p>
         </div>
     </div>
 
@@ -428,8 +456,9 @@
             const processBtn = document.getElementById('processBtn');
             const progressBar = document.getElementById('progressBar');
             const exportBtn = document.getElementById('exportBtn');
-            const debugSection = document.getElementById('debugSection');
             const debugInfo = document.getElementById('debugInfo');
+            const filePreviewCard = document.getElementById('filePreviewCard');
+            const filePreview = document.getElementById('filePreview');
             
             const failedTotal = document.getElementById('failedTotal');
             const failedCount = document.getElementById('failedCount');
@@ -508,6 +537,16 @@
                             <span class="file-size">${formatFileSize(file.size)}</span>
                         `;
                         fileList.appendChild(fileItem);
+                        
+                        // Preview the first file
+                        if (i === 0) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                filePreview.textContent = e.target.result;
+                                filePreviewCard.classList.remove('d-none');
+                            };
+                            reader.readAsText(file);
+                        }
                     }
                 }
                 
@@ -532,8 +571,7 @@
                 const progressBarInner = progressBar.querySelector('.progress-bar');
                 
                 // Clear debug info
-                debugInfo.innerHTML = '';
-                debugSection.classList.add('d-none');
+                debugInfo.textContent = 'Memproses file...\n';
                 
                 // Process each file
                 let processed = 0;
@@ -541,6 +579,7 @@
                     const reader = new FileReader();
                     reader.onload = function(e) {
                         const content = e.target.result;
+                        debugInfo.textContent += `\nMemproses file: ${file.name}\n`;
                         processFileContent(content, file.name);
                         
                         processed++;
@@ -561,31 +600,39 @@
             // Process content of a single file
             function processFileContent(content, fileName) {
                 const lines = content.split('\n');
-                let debugContent = `<strong>File: ${fileName}</strong><br>`;
+                let debugContent = '';
                 
                 // Process REPLENISHMENT first (only once per file)
-                let replenishProcessed = false;
+                let replenishFound = false;
                 
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i];
                     
-                    if (!replenishProcessed && line.includes('REPLENISHMENT')) {
-                        debugContent += `Found REPLENISHMENT at line ${i+1}<br>`;
+                    if (!replenishFound && line.includes('REPLENISHMENT')) {
+                        debugContent += `✓ Ditemukan REPLENISHMENT di baris ${i+1}\n`;
                         
-                        // For REPLENISHMENT, look for INIT AMOUNT below
-                        const amount = findInitAmountBelow(lines, i);
-                        if (amount !== null) {
-                            debugContent += `Found INIT AMOUNT: ${formatCurrency(amount)}<br>`;
-                            results.replenish.count++;
-                            results.replenish.total += amount;
-                            results.replenish.transactions.push({
-                                file: fileName,
-                                amount: amount,
-                                line: i + 1
-                            });
-                            replenishProcessed = true;
-                        } else {
-                            debugContent += `INIT AMOUNT not found after REPLENISHMENT<br>`;
+                        // For REPLENISHMENT, look for INIT AMOUNT below (within 50 lines)
+                        for (let j = i + 1; j < lines.length && j <= i + 50; j++) {
+                            if (lines[j].includes('INIT AMOUNT:')) {
+                                const amountInfo = extractInitAmountFromLine(lines[j]);
+                                if (amountInfo) {
+                                    debugContent += `✓ Ditemukan INIT AMOUNT di baris ${j+1}: ${amountInfo.amountRaw} → ${formatCurrency(amountInfo.amount)}\n`;
+                                    results.replenish.count++;
+                                    results.replenish.total += amountInfo.amount;
+                                    results.replenish.transactions.push({
+                                        file: fileName,
+                                        amount: amountInfo.amount,
+                                        line: i + 1,
+                                        initAmountLine: j + 1
+                                    });
+                                    replenishFound = true;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        if (!replenishFound) {
+                            debugContent += `✗ INIT AMOUNT tidak ditemukan setelah REPLENISHMENT\n`;
                         }
                     }
                     
@@ -627,11 +674,8 @@
                     }
                 }
                 
-                // Show debug info if no replenishment found
-                if (results.replenish.count === 0) {
-                    debugInfo.innerHTML += debugContent;
-                    debugSection.classList.remove('d-none');
-                }
+                // Update debug info
+                debugInfo.textContent += debugContent;
             }
             
             // Find AMOUNT value above the current line
@@ -646,42 +690,62 @@
                 return null;
             }
             
-            // Find INIT AMOUNT value below the REPLENISHMENT line
-            function findInitAmountBelow(lines, currentLine) {
-                // Search downwards from current line
-                for (let i = currentLine + 1; i < lines.length && i <= currentLine + 20; i++) {
-                    if (lines[i].includes('INIT AMOUNT:')) {
-                        // Extract numeric value from amount line
-                        return extractAmountFromLine(lines[i]);
-                    }
+            // Extract amount from a line containing AMOUNT information
+            function extractAmountFromLine(line) {
+                // Match numbers with optional dots/commas as thousand separators
+                const amountMatch = line.match(/(\d[\d.,]*)/);
+                if (amountMatch) {
+                    // Clean and convert the amount
+                    const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
+                    const amount = parseInt(amountStr, 10);
+                    return isNaN(amount) ? null : amount;
                 }
                 return null;
             }
             
-            // Extract amount from a line containing amount information
-            function extractAmountFromLine(line) {
-                // Remove text and keep only numbers and separators
-                const cleanedLine = line.replace(/[^\d.,]/g, ' ').trim();
-                const parts = cleanedLine.split(' ');
+            // Extract amount from a line containing INIT AMOUNT information
+            function extractInitAmountFromLine(line) {
+                // Match pattern: INIT AMOUNT: [spaces] [amount with dots/commas] [spaces] IDR
+                const initAmountMatch = line.match(/INIT AMOUNT:\s*([\d.,]+)\s*IDR/i);
+                if (initAmountMatch && initAmountMatch[1]) {
+                    // Clean and convert the amount
+                    const amountStr = initAmountMatch[1].replace(/\./g, '').replace(/,/g, '');
+                    const amount = parseInt(amountStr, 10);
+                    if (!isNaN(amount)) {
+                        return {
+                            amount: amount,
+                            amountRaw: initAmountMatch[1]
+                        };
+                    }
+                }
                 
-                for (const part of parts) {
-                    if (part.length > 0) {
-                        // Clean and convert the amount
-                        const amountStr = part.replace(/\./g, '').replace(/,/g, '');
+                // Alternative pattern: look for numbers between INIT AMOUNT: and IDR
+                const alternativeMatch = line.match(/INIT AMOUNT:(.*?)IDR/i);
+                if (alternativeMatch && alternativeMatch[1]) {
+                    const amountPart = alternativeMatch[1].trim();
+                    const amountMatch = amountPart.match(/([\d.,]+)/);
+                    if (amountMatch) {
+                        const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
                         const amount = parseInt(amountStr, 10);
-                        if (!isNaN(amount) && amount > 0) {
-                            return amount;
+                        if (!isNaN(amount)) {
+                            return {
+                                amount: amount,
+                                amountRaw: amountMatch[0]
+                            };
                         }
                     }
                 }
                 
-                // Alternative approach: look for numbers with separators
-                const amountMatch = line.match(/(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/);
-                if (amountMatch) {
-                    const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
+                // Last resort: extract any number from the line
+                const numberMatch = line.match(/(\d[\d.,]*)/);
+                if (numberMatch) {
+                    const amountStr = numberMatch[0].replace(/\./g, '').replace(/,/g, '');
                     const amount = parseInt(amountStr, 10);
-                    if (!isNaN(amount) && amount > 0) {
-                        return amount;
+                    if (!isNaN(amount)) {
+                        return {
+                            amount: amount,
+                            amountRaw: numberMatch[0]
+                        };
                     }
                 }
                 
@@ -719,7 +783,7 @@
                 
                 // Add replenishment transactions
                 results.replenish.transactions.forEach(trans => {
-                    addTransactionRow('replenish', trans.file, trans.amount, trans.line);
+                    addTransactionRow('replenish', trans.file, trans.amount, trans.line, trans.initAmountLine);
                 });
                 
                 // Add failed transactions
@@ -736,10 +800,18 @@
                 results.taken.transactions.forEach(trans => {
                     addTransactionRow('taken', trans.file, trans.amount, trans.line);
                 });
+                
+                // Update debug info with final results
+                debugInfo.textContent += `\n=== HASIL AKHIR ===\n`;
+                debugInfo.textContent += `Replenishment: ${formatCurrency(results.replenish.total)}\n`;
+                debugInfo.textContent += `Host Store Failed: ${formatCurrency(results.failed.total)}\n`;
+                debugInfo.textContent += `Host Store Stored: ${formatCurrency(results.stored.total)}\n`;
+                debugInfo.textContent += `Cash Taken: ${formatCurrency(results.taken.total)}\n`;
+                debugInfo.textContent += `Hasil Rekonsiliasi: ${formatCurrency(finalAmount)}\n`;
             }
             
             // Add transaction row to details table
-            function addTransactionRow(type, file, amount, line) {
+            function addTransactionRow(type, file, amount, line, initAmountLine = null) {
                 const row = document.createElement('tr');
                 
                 let typeBadge = '';
@@ -753,10 +825,12 @@
                     typeBadge = '<span class="badge bg-purple">Replenish</span>';
                 }
                 
+                const lineInfo = initAmountLine ? `REPL: ${line}, INIT: ${initAmountLine}` : line;
+                
                 row.innerHTML = `
                     <td>${typeBadge}</td>
                     <td>${file}</td>
-                    <td>${line}</td>
+                    <td>${lineInfo}</td>
                     <td>${formatCurrency(amount)}</td>
                 `;
                 
