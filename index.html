@@ -15,6 +15,7 @@
             --replenish: #9b59b6;
             --denom50: #f39c12;
             --denom100: #8e44ad;
+            --remaining: #16a085;
         }
         
         body {
@@ -138,6 +139,9 @@
         #denom100Header {
             background-color: var(--denom100);
         }
+        #remainingHeader {
+            background-color: var(--remaining);
+        }
         .keyword {
             display: inline-block;
             padding: 3px 8px;
@@ -238,6 +242,23 @@
         }
         .denom-table th {
             background-color: #f8f9fa;
+        }
+        .remaining-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .remaining-table th, .remaining-table td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        .remaining-table th {
+            background-color: #f8f9fa;
+        }
+        .remaining-table tr:last-child {
+            font-weight: bold;
+            background-color: #e9ecef;
         }
     </style>
 </head>
@@ -381,6 +402,10 @@
                                 <th>Lembar</th>
                             </tr>
                             <tr>
+                                <td>Replenish</td>
+                                <td id="denom50Replenish">0</td>
+                            </tr>
+                            <tr>
                                 <td>Stored Count</td>
                                 <td id="denom50Stored">0</td>
                             </tr>
@@ -408,6 +433,10 @@
                                 <th>Lembar</th>
                             </tr>
                             <tr>
+                                <td>Replenish</td>
+                                <td id="denom100Replenish">0</td>
+                            </tr>
+                            <tr>
                                 <td>Stored Count</td>
                                 <td id="denom100Stored">0</td>
                             </tr>
@@ -415,6 +444,49 @@
                                 <td>Dispense Count</td>
                                 <td id="denom100Dispense">0</td>
                             </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remaining Results -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card result-card">
+                    <div class="result-header" id="remainingHeader">
+                        <i class="fas fa-calculator me-2"></i>Sisa Lembar (Remaining)
+                    </div>
+                    <div class="result-body">
+                        <table class="remaining-table">
+                            <thead>
+                                <tr>
+                                    <th>Denominasi</th>
+                                    <th>Replenish</th>
+                                    <th>Stored Count</th>
+                                    <th>Dispense Count</th>
+                                    <th>Sisa Lembar</th>
+                                    <th>Formula</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>50,000</td>
+                                    <td id="remaining50Replenish">0</td>
+                                    <td id="remaining50Stored">0</td>
+                                    <td id="remaining50Dispense">0</td>
+                                    <td id="remaining50Total" class="fw-bold">0</td>
+                                    <td>Replenish + Stored - Dispense</td>
+                                </tr>
+                                <tr>
+                                    <td>100,000</td>
+                                    <td id="remaining100Replenish">0</td>
+                                    <td id="remaining100Stored">0</td>
+                                    <td id="remaining100Dispense">0</td>
+                                    <td id="remaining100Total" class="fw-bold">0</td>
+                                    <td>Replenish + Stored - Dispense</td>
+                                </tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -561,13 +633,25 @@
             
             const denom50Total = document.getElementById('denom50Total');
             const denom50Count = document.getElementById('denom50Count');
+            const denom50Replenish = document.getElementById('denom50Replenish');
             const denom50Stored = document.getElementById('denom50Stored');
             const denom50Dispense = document.getElementById('denom50Dispense');
             
             const denom100Total = document.getElementById('denom100Total');
             const denom100Count = document.getElementById('denom100Count');
+            const denom100Replenish = document.getElementById('denom100Replenish');
             const denom100Stored = document.getElementById('denom100Stored');
             const denom100Dispense = document.getElementById('denom100Dispense');
+            
+            const remaining50Replenish = document.getElementById('remaining50Replenish');
+            const remaining50Stored = document.getElementById('remaining50Stored');
+            const remaining50Dispense = document.getElementById('remaining50Dispense');
+            const remaining50Total = document.getElementById('remaining50Total');
+            
+            const remaining100Replenish = document.getElementById('remaining100Replenish');
+            const remaining100Stored = document.getElementById('remaining100Stored');
+            const remaining100Dispense = document.getElementById('remaining100Dispense');
+            const remaining100Total = document.getElementById('remaining100Total');
             
             const calcInitAmount = document.getElementById('calcInitAmount');
             const calcFailed = document.getElementById('calcFailed');
@@ -585,6 +669,8 @@
                 taken: { total: 0, count: 0, transactions: [] },
                 replenish: { total: 0, count: 0, transactions: [] },
                 denom: {
+                    replenish50: 0,
+                    replenish100: 0,
                     stored50: 0,
                     stored100: 0,
                     dispense50: 0,
@@ -671,6 +757,8 @@
                     taken: { total: 0, count: 0, transactions: [] },
                     replenish: { total: 0, count: 0, transactions: [] },
                     denom: {
+                        replenish50: 0,
+                        replenish100: 0,
                         stored50: 0,
                         stored100: 0,
                         dispense50: 0,
@@ -739,14 +827,17 @@
                                     }];
                                     replenishFound = true;
                                     debugContent += `✓ Mengambil nilai REPLENISHMENT pertama: ${formatCurrency(amountInfo.amount)}\n`;
-                                    break;
                                 }
                             }
                         }
                         
+                        // Process REPLENISHMENT lembar (cassette data)
                         if (!replenishFound) {
                             debugContent += `✗ INIT AMOUNT tidak ditemukan setelah REPLENISHMENT\n`;
                         }
+                        
+                        // Process cassette data for replenish lembar
+                        processReplenishLembar(lines, i, debugContent);
                         
                         // Hentikan pencarian REPLENISHMENT setelah menemukan yang pertama
                         break;
@@ -800,6 +891,38 @@
                 
                 // Update debug info
                 debugInfo.textContent += debugContent;
+            }
+            
+            // Process REPLENISHMENT lembar (cassette data)
+            function processReplenishLembar(lines, startLine, debugContent) {
+                debugContent += `✓ Mencari data cassette setelah REPLENISHMENT\n`;
+                
+                for (let i = startLine + 1; i < lines.length; i++) {
+                    const line = lines[i];
+                    
+                    // Stop when we reach the separator line
+                    if (line.includes('----------------------------------------')) {
+                        break;
+                    }
+                    
+                    // Look for cassette data patterns like CASSETTEX   50000 1500
+                    const cassetteMatch = line.match(/(CASSETTE\d+)\s+(\d+)\s+(\d+)/);
+                    if (cassetteMatch) {
+                        const cassette = cassetteMatch[1];
+                        const denomValue = parseInt(cassetteMatch[2], 10);
+                        const denomCount = parseInt(cassetteMatch[3], 10);
+                        
+                        debugContent += `✓ Ditemukan ${cassette}: Denom ${denomValue}, Count ${denomCount}\n`;
+                        
+                        if (denomValue === 50000) {
+                            results.denom.replenish50 += denomCount;
+                        } else if (denomValue === 100000) {
+                            results.denom.replenish100 += denomCount;
+                        }
+                    }
+                }
+                
+                debugContent += `✓ Total Replenish Lembar: 50,000=${results.denom.replenish50}, 100,000=${results.denom.replenish100}\n`;
             }
             
             // Process Stored Count and Dispense Count for denomination counting
@@ -948,18 +1071,34 @@
                 replenishCount.textContent = `${results.replenish.count} Init Amount ditemukan`;
                 
                 // Update denomination results
-                const totalDenom50 = results.denom.stored50 + results.denom.dispense50;
-                const totalDenom100 = results.denom.stored100 + results.denom.dispense100;
+                const totalDenom50 = results.denom.replenish50 + results.denom.stored50 + results.denom.dispense50;
+                const totalDenom100 = results.denom.replenish100 + results.denom.stored100 + results.denom.dispense100;
                 
                 denom50Total.textContent = totalDenom50;
                 denom50Count.textContent = `${totalDenom50} lembar`;
+                denom50Replenish.textContent = results.denom.replenish50;
                 denom50Stored.textContent = results.denom.stored50;
                 denom50Dispense.textContent = results.denom.dispense50;
                 
                 denom100Total.textContent = totalDenom100;
                 denom100Count.textContent = `${totalDenom100} lembar`;
+                denom100Replenish.textContent = results.denom.replenish100;
                 denom100Stored.textContent = results.denom.stored100;
                 denom100Dispense.textContent = results.denom.dispense100;
+                
+                // Update remaining results
+                const remaining50 = results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50;
+                const remaining100 = results.denom.replenish100 + results.denom.stored100 - results.denom.dispense100;
+                
+                remaining50Replenish.textContent = results.denom.replenish50;
+                remaining50Stored.textContent = results.denom.stored50;
+                remaining50Dispense.textContent = results.denom.dispense50;
+                remaining50Total.textContent = remaining50;
+                
+                remaining100Replenish.textContent = results.denom.replenish100;
+                remaining100Stored.textContent = results.denom.stored100;
+                remaining100Dispense.textContent = results.denom.dispense100;
+                remaining100Total.textContent = remaining100;
                 
                 // Update calculation table
                 calcInitAmount.textContent = formatCurrency(results.replenish.total);
@@ -1001,8 +1140,10 @@
                 debugInfo.textContent += `Host Store Failed: ${formatCurrency(results.failed.total)}\n`;
                 debugInfo.textContent += `Host Store Stored: ${formatCurrency(results.stored.total)}\n`;
                 debugInfo.textContent += `Cash Taken: ${formatCurrency(results.taken.total)}\n`;
-                debugInfo.textContent += `Denom 50,000: ${totalDenom50} lembar (Stored: ${results.denom.stored50}, Dispense: ${results.denom.dispense50})\n`;
-                debugInfo.textContent += `Denom 100,000: ${totalDenom100} lembar (Stored: ${results.denom.stored100}, Dispense: ${results.denom.dispense100})\n`;
+                debugInfo.textContent += `Replenish Lembar - 50,000: ${results.denom.replenish50}, 100,000: ${results.denom.replenish100}\n`;
+                debugInfo.textContent += `Stored Count - 50,000: ${results.denom.stored50}, 100,000: ${results.denom.stored100}\n`;
+                debugInfo.textContent += `Dispense Count - 50,000: ${results.denom.dispense50}, 100,000: ${results.denom.dispense100}\n`;
+                debugInfo.textContent += `Sisa Lembar - 50,000: ${remaining50}, 100,000: ${remaining100}\n`;
                 debugInfo.textContent += `Hasil Rekonsiliasi: ${formatCurrency(finalAmount)}\n`;
             }
             
@@ -1061,9 +1202,10 @@
                 csvContent += '\n';
                 csvContent += 'DENOMINATION SUMMARY\n';
                 csvContent += 'Type,Denom 50,000,Denom 100,000\n';
+                csvContent += `Replenish Lembar,${results.denom.replenish50},${results.denom.replenish100}\n`;
                 csvContent += `Stored Count,${results.denom.stored50},${results.denom.stored100}\n`;
                 csvContent += `Dispense Count,${results.denom.dispense50},${results.denom.dispense100}\n`;
-                csvContent += `Total,${results.denom.stored50 + results.denom.dispense50},${results.denom.stored100 + results.denom.dispense100}\n`;
+                csvContent += `Sisa Lembar,${results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50},${results.denom.replenish100 + results.denom.stored100 - results.denom.dispense100}\n`;
                 
                 // Add summary
                 csvContent += '\n';
