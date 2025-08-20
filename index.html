@@ -915,14 +915,14 @@
                         debugContent += `✓ Ditemukan ${cassette}: Denom ${denomValue}, Count ${denomCount}\n`;
                         
                         if (denomValue === 50000) {
-                            results.denom.replenish50/2 += denomCount;
+                            results.denom.replenish50 += denomCount;
                         } else if (denomValue === 100000) {
-                            results.denom.replenish100/2 += denomCount;
+                            results.denom.replenish100 += denomCount;
                         }
                     }
                 }
                 
-                debugContent += `✓ Total Replenish Lembar: 50,000=${results.denom.replenish50/2}, 100,000=${results.denom.replenish100/2}\n`;
+                debugContent += `✓ Total Replenish Lembar: 50,000=${results.denom.replenish50}, 100,000=${results.denom.replenish100}\n`;
             }
             
             // Process Stored Count and Dispense Count for denomination counting
@@ -1071,31 +1071,31 @@
                 replenishCount.textContent = `${results.replenish.count} Init Amount ditemukan`;
                 
                 // Update denomination results
-                const totalDenom50 = results.denom.replenish50/2 + results.denom.stored50 + results.denom.dispense50;
-                const totalDenom100 = results.denom.replenish100/2 + results.denom.stored100 + results.denom.dispense100;
+                const totalDenom50 = results.denom.replenish50 + results.denom.stored50 + results.denom.dispense50;
+                const totalDenom100 = results.denom.replenish100 + results.denom.stored100 + results.denom.dispense100;
                 
                 denom50Total.textContent = totalDenom50;
                 denom50Count.textContent = `${totalDenom50} lembar`;
-                denom50Replenish.textContent = results.denom.replenish50/2;
+                denom50Replenish.textContent = results.denom.replenish50;
                 denom50Stored.textContent = results.denom.stored50;
                 denom50Dispense.textContent = results.denom.dispense50;
                 
                 denom100Total.textContent = totalDenom100;
                 denom100Count.textContent = `${totalDenom100} lembar`;
-                denom100Replenish.textContent = results.denom.replenish100/2;
+                denom100Replenish.textContent = results.denom.replenish100;
                 denom100Stored.textContent = results.denom.stored100;
                 denom100Dispense.textContent = results.denom.dispense100;
                 
                 // Update remaining results
-                const remaining50 = results.denom.replenish50/2 + results.denom.stored50 - results.denom.dispense50;
-                const remaining100 = results.denom.replenish100/2 + results.denom.stored100 - results.denom.dispense100;
+                const remaining50 = results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50;
+                const remaining100 = results.denom.replenish100 + results.denom.stored100 - results.denom.dispense100;
                 
                 remaining50Replenish.textContent = results.denom.replenish50;
                 remaining50Stored.textContent = results.denom.stored50;
                 remaining50Dispense.textContent = results.denom.dispense50;
                 remaining50Total.textContent = remaining50;
                 
-                remaining100Replenish.textContent = results.denom.replenish100/2;
+                remaining100Replenish.textContent = results.denom.replenish100;
                 remaining100Stored.textContent = results.denom.stored100;
                 remaining100Dispense.textContent = results.denom.dispense100;
                 remaining100Total.textContent = remaining100;
@@ -1140,7 +1140,7 @@
                 debugInfo.textContent += `Host Store Failed: ${formatCurrency(results.failed.total)}\n`;
                 debugInfo.textContent += `Host Store Stored: ${formatCurrency(results.stored.total)}\n`;
                 debugInfo.textContent += `Cash Taken: ${formatCurrency(results.taken.total)}\n`;
-                debugInfo.textContent += `Replenish Lembar - 50,000: ${results.denom.replenish50/2}, 100,000: ${results.denom.replenish100/2}\n`;
+                debugInfo.textContent += `Replenish Lembar - 50,000: ${results.denom.replenish50}, 100,000: ${results.denom.replenish100}\n`;
                 debugInfo.textContent += `Stored Count - 50,000: ${results.denom.stored50}, 100,000: ${results.denom.stored100}\n`;
                 debugInfo.textContent += `Dispense Count - 50,000: ${results.denom.dispense50}, 100,000: ${results.denom.dispense100}\n`;
                 debugInfo.textContent += `Sisa Lembar - 50,000: ${remaining50}, 100,000: ${remaining100}\n`;
