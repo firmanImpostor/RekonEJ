@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Rekon EJ - ATM Transactions</title>
+    <title>Aplikasi Rekon CRM Hitachi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --hitachi: #6c5ce7;
-            --hyosung: #00b894;
-            --wincore: #fd79a8;
-            --ncr: #fdcb6e;
+            --failed: #e74c3c;
+            --stored: #27ae60;
+            --taken: #3498db;
         }
         
         body {
             background-color: #f8f9fa;
             padding-top: 20px;
             padding-bottom: 40px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .card {
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -25,26 +26,16 @@
             border: none;
             border-radius: 10px;
         }
-        .table-container {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .match-true {
-            background-color: #d4edda !important;
-        }
-        .match-false {
-            background-color: #f8d7da !important;
-        }
         .header {
-            background: linear-gradient(135deg, #6c5ce7, #3498db);
+            background: linear-gradient(135deg, var(--hitachi), #3498db);
             color: white;
-            padding: 20px 0;
+            padding: 25px 0;
             border-radius: 10px;
             margin-bottom: 25px;
         }
         .instructions {
             background-color: #e9ecef;
-            border-left: 4px solid #3498db;
+            border-left: 4px solid var(--hitachi);
             padding: 15px;
             margin-bottom: 20px;
             border-radius: 0 5px 5px 0;
@@ -57,80 +48,107 @@
             text-align: center;
             border-radius: 5px;
         }
-        .btn-primary {
-            background-color: #3498db;
-            border-color: #3498db;
-        }
-        .btn-primary:hover {
-            background-color: #2980b9;
-            border-color: #2980b9;
-        }
-        .nav-pills .nav-link.active {
-            background-color: #3498db;
-        }
-        .platform-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-        .badge-hitachi {
+        .btn-hitachi {
             background-color: var(--hitachi);
+            border-color: var(--hitachi);
             color: white;
         }
-        .badge-hyosung {
-            background-color: var(--hyosung);
+        .btn-hitachi:hover {
+            background-color: #5649c0;
+            border-color: #5649c0;
             color: white;
-        }
-        .badge-wincore {
-            background-color: var(--wincore);
-            color: white;
-        }
-        .badge-ncr {
-            background-color: var(--ncr);
-            color: black;
-        }
-        .stat-box {
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            color: white;
-        }
-        .stat-box-source {
-            background-color: #3498db;
-        }
-        .stat-box-target {
-            background-color: #2ecc71;
-        }
-        .stat-box-match {
-            background-color: #27ae60;
-        }
-        .stat-box-mismatch {
-            background-color: #e74c3c;
         }
         .upload-area {
             border: 2px dashed #dee2e6;
             border-radius: 8px;
-            padding: 20px;
+            padding: 30px;
             text-align: center;
             margin-bottom: 15px;
             cursor: pointer;
             transition: all 0.3s;
+            background-color: #f8f9fa;
         }
         .upload-area:hover {
-            border-color: #3498db;
-            background-color: #f8f9fa;
+            border-color: var(--hitachi);
+            background-color: #f0f7ff;
         }
-        .result-item {
-            padding: 10px 15px;
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        .file-item {
+            padding: 8px 12px;
+            background-color: #f1f3f5;
             border-radius: 5px;
-            margin-bottom: 10px;
-            background-color: #f8f9fa;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .amount {
+        .file-item .file-name {
+            flex-grow: 1;
+            margin-right: 10px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .result-card {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .result-header {
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+        }
+        .result-body {
+            padding: 20px;
+        }
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
             font-family: monospace;
-            text-align: right;
+        }
+        .result-count {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+        #failedHeader {
+            background-color: var(--failed);
+        }
+        #storedHeader {
+            background-color: var(--stored);
+        }
+        #takenHeader {
+            background-color: var(--taken);
+        }
+        .keyword {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            background-color: #e9ecef;
+        }
+        .progress {
+            height: 8px;
+            margin-bottom: 15px;
+        }
+        .amount-example {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid var(--hitachi);
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 2px 4px;
+            border-radius: 3px;
             font-weight: bold;
         }
     </style>
@@ -139,105 +157,56 @@
     <div class="container">
         <!-- Header -->
         <div class="header text-center">
-            <h1><i class="fas fa-money-bill-wave me-2"></i>Aplikasi Rekon EJ Transaksi ATM</h1>
-            <p class="lead">Rekonsiliasi Entri Jurnal Transaksi Tarik Tunai</p>
+            <h1><i class="fas fa-money-bill-wave me-2"></i>Aplikasi Rekon CRM Hitachi</h1>
+            <p class="lead">Rekonsiliasi File JRN/TXT untuk Transaksi ATM</p>
         </div>
 
-        <!-- Platform Selection -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-atm me-2"></i>Pilih Platform ATM</h5>
-            </div>
-            <div class="card-body">
-                <ul class="nav nav-pills mb-3" id="platformTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="hitachi-tab" data-bs-toggle="pill" data-bs-target="#hitachi" type="button" role="tab">CRM Hitachi</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="hyosung-tab" data-bs-toggle="pill" data-bs-target="#hyosung" type="button" role="tab">ATM Hyosung</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="wincore-tab" data-bs-toggle="pill" data-bs-target="#wincore" type="button" role="tab">ATM Wincore</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="ncr-tab" data-bs-toggle="pill" data-bs-target="#ncr" type="button" role="tab">ATM NCR</button>
-                    </li>
-                </ul>
-                
-                <div class="tab-content" id="platformTabContent">
-                    <div class="tab-pane fade show active" id="hitachi" role="tabpanel">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>CRM Hitachi:</strong> Format data harus mengandung kolom: <code>TransactionID, Date, Amount, Branch</code>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="hyosung" role="tabpanel">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>ATM Hyosung:</strong> Format data harus mengandung kolom: <code>RefNumber, TransDate, TransAmount, Location</code>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="wincore" role="tabpanel">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>ATM Wincore:</strong> Format data harus mengandung kolom: <code>SEQ, TANGGAL, NOMINAL, CABANG</code>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="ncr" role="tabpanel">
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>ATM NCR:</strong> Format data harus mengandung kolom: <code>ID, TransactionDate, CashAmount, ATMCode</code>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Instructions -->
+        <div class="instructions">
+            <h4><i class="fas fa-info-circle me-2"></i>Petunjuk Penggunaan</h4>
+            <ol class="mb-0">
+                <li>Upload file <span class="keyword">.jrn</span> atau <span class="keyword">.txt</span> dari CRM Hitachi (bisa multiple files)</li>
+                <li>Aplikasi akan mencari keyword: 
+                    <span class="keyword">Host Store: Failed</span>, 
+                    <span class="keyword">Host Store: Stored</span>, 
+                    <span class="keyword">Cash Taken</span>
+                </li>
+                <li>Untuk setiap keyword yang ditemukan, aplikasi akan mencari nilai <span class="keyword">AMOUNT</span> terdekat di atasnya</li>
+                <li>Contoh format amount: <span class="amount-example">AMOUNT : RP 300.000</span> atau <span class="amount-example">AMOUNT : RP 300,000</span></li>
+                <li>Hasil rekonsiliasi akan menampilkan jumlah dan total nilai untuk setiap kategori</li>
+            </ol>
         </div>
 
         <div class="row">
-            <!-- Input Data Section -->
+            <!-- Upload Section -->
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-database me-2"></i>Input Data</h5>
+                        <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Upload File</h5>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Data dari Sistem Bank (Sumber)</label>
-                            <div class="upload-area" id="sourceUploadArea">
-                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-                                <p>Klik untuk upload file CSV atau drop file di sini</p>
-                                <small class="text-muted">Format: TransactionID, Date, Amount, Branch</small>
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt fa-3x mb-3" style="color: var(--hitachi);"></i>
+                            <h5>Drop file di sini atau klik untuk memilih</h5>
+                            <p class="text-muted">Format file: .jrn atau .txt (multiple files supported)</p>
+                            <button class="btn btn-hitachi mt-2">
+                                <i class="fas fa-file-upload me-2"></i>Pilih File
+                            </button>
+                        </div>
+                        <input type="file" id="fileInput" multiple accept=".jrn,.txt" style="display: none;">
+                        
+                        <div id="fileListContainer" class="d-none">
+                            <h6 class="mt-4">File yang diupload:</h6>
+                            <div class="file-list" id="fileList">
+                                <!-- File list will be populated here -->
                             </div>
-                            <textarea class="form-control" id="sourceData" rows="5" placeholder="Atau paste data CSV di sini...">TransactionID,Date,Amount,Branch
-TR001,2023-10-01,1250000,BCA-Sudirman
-TR002,2023-10-01,750000,BCA-Thamrin
-TR003,2023-10-02,1500000,BCA-Kuningan
-TR004,2023-10-02,500000,BCA-Menteng
-TR005,2023-10-03,2000000,BCA-Senayan</textarea>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Data dari ATM (Tujuan)</label>
-                            <div class="upload-area" id="targetUploadArea">
-                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
-                                <p>Klik untuk upload file CSV atau drop file di sini</p>
-                                <small class="text-muted">Format bervariasi berdasarkan platform ATM</small>
-                            </div>
-                            <textarea class="form-control" id="targetData" rows="5" placeholder="Atau paste data CSV di sini...">TransactionID,Date,Amount,Branch
-TR001,2023-10-01,1250000,BCA-Sudirman
-TR002,2023-10-01,750000,BCA-Thamrin
-TR003,2023-10-02,1500000,BCA-Kuningan
-TR004,2023-10-02,500000,BCA-Menteng
-TR006,2023-10-03,1750000,BCA-Senayan</textarea>
+                        
+                        <div class="progress d-none" id="progressBar">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Kolom Kunci untuk Pencocokan</label>
-                            <select class="form-select" id="keyColumns">
-                                <option value="TransactionID">Transaction ID</option>
-                                <option value="Date,Amount">Date + Amount</option>
-                                <option value="Date,Amount,Branch">Date + Amount + Branch</option>
-                            </select>
-                        </div>
-                        <button id="processBtn" class="btn btn-primary w-100">
+                        
+                        <button id="processBtn" class="btn btn-hitachi w-100 mt-3 d-none">
                             <i class="fas fa-cogs me-2"></i>Proses Rekonsiliasi
                         </button>
                     </div>
@@ -246,81 +215,67 @@ TR006,2023-10-03,1750000,BCA-Senayan</textarea>
 
             <!-- Results Section -->
             <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Hasil Rekonsiliasi</h5>
+                <div class="card result-card">
+                    <div class="result-header" id="failedHeader">
+                        <i class="fas fa-times-circle me-2"></i>Host Store: Failed (Setor Tunai Gagal)
+                    </div>
+                    <div class="result-body">
+                        <div class="result-value" id="failedTotal">Rp 0</div>
+                        <div class="result-count" id="failedCount">0 transaksi</div>
+                    </div>
+                </div>
+
+                <div class="card result-card">
+                    <div class="result-header" id="storedHeader">
+                        <i class="fas fa-check-circle me-2"></i>Host Store: Stored (Setor Tunai Berhasil)
+                    </div>
+                    <div class="result-body">
+                        <div class="result-value" id="storedTotal">Rp 0</div>
+                        <div class="result-count" id="storedCount">0 transaksi</div>
+                    </div>
+                </div>
+
+                <div class="card result-card">
+                    <div class="result-header" id="takenHeader">
+                        <i class="fas fa-money-bill-wave me-2"></i>Cash Taken (Tarik Tunai)
+                    </div>
+                    <div class="result-body">
+                        <div class="result-value" id="takenTotal">Rp 0</div>
+                        <div class="result-count" id="takenCount">0 transaksi</div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detail Transaksi</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row mb-4">
-                            <div class="col-6">
-                                <div class="stat-box stat-box-source">
-                                    <h6>Data Sumber</h6>
-                                    <h3 id="sourceCount">0</h3>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-box stat-box-target">
-                                    <h6>Data Tujuan</h6>
-                                    <h3 id="targetCount">0</h3>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-box stat-box-match">
-                                    <h6>Cocok</h6>
-                                    <h3 id="matchCount">0</h3>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-box stat-box-mismatch">
-                                    <h6>Tidak Cocok</h6>
-                                    <h3 id="mismatchCount">0</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h5>Detail Rekonsiliasi</h5>
-                        <div class="table-container">
-                            <table class="table table-striped">
-                                <thead class="sticky-top bg-light">
+                        <div class="table-container" style="max-height: 200px; overflow-y: auto;">
+                            <table class="table table-sm">
+                                <thead>
                                     <tr>
-                                        <th>Status</th>
-                                        <th>ID Transaksi</th>
-                                        <th>Tanggal</th>
-                                        <th>Jumlah</th>
-                                        <th>Lokasi</th>
+                                        <th>Jenis</th>
+                                        <th>File</th>
+                                        <th>Amount</th>
                                     </tr>
                                 </thead>
-                                <tbody id="resultsBody">
-                                    <!-- Results will be populated here -->
+                                <tbody id="transactionDetails">
+                                    <!-- Transaction details will be populated here -->
                                 </tbody>
                             </table>
                         </div>
-                        
-                        <div class="d-grid gap-2 mt-3">
-                            <button class="btn btn-outline-primary" id="exportBtn">
-                                <i class="fas fa-download me-2"></i>Export Hasil
-                            </button>
-                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Instructions -->
-        <div class="instructions mt-4">
-            <h4><i class="fas fa-info-circle me-2"></i>Petunjuk Penggunaan</h4>
-            <ol>
-                <li>Pilih platform ATM yang akan direkonsiliasi</li>
-                <li>Upload atau paste data dari sistem bank (sumber) dan data dari ATM (tujuan)</li>
-                <li>Pilih kolom kunci yang akan digunakan untuk pencocokan</li>
-                <li>Klik tombol "Proses Rekonsiliasi" untuk membandingkan data</li>
-                <li>Periksa hasil rekonsiliasi dan export jika diperlukan</li>
-            </ol>
+                <button id="exportBtn" class="btn btn-outline-hitachi w-100 mt-3 d-none">
+                    <i class="fas fa-download me-2"></i>Export Hasil ke CSV
+                </button>
+            </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p class="mb-0">Aplikasi Rekon EJ Transaksi ATM &copy; 2023 - Hosting dengan GitHub Pages</p>
+            <p class="mb-0">Aplikasi Rekon CRM Hitachi &copy; 2023 - Hosting dengan GitHub Pages</p>
         </div>
     </div>
 
@@ -328,248 +283,278 @@ TR006,2023-10-03,1750000,BCA-Senayan</textarea>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elements
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileList = document.getElementById('fileList');
+            const fileListContainer = document.getElementById('fileListContainer');
             const processBtn = document.getElementById('processBtn');
+            const progressBar = document.getElementById('progressBar');
             const exportBtn = document.getElementById('exportBtn');
-            const sourceData = document.getElementById('sourceData');
-            const targetData = document.getElementById('targetData');
-            const keyColumns = document.getElementById('keyColumns');
-            const sourceCount = document.getElementById('sourceCount');
-            const targetCount = document.getElementById('targetCount');
-            const matchCount = document.getElementById('matchCount');
-            const mismatchCount = document.getElementById('mismatchCount');
-            const resultsBody = document.getElementById('resultsBody');
             
-            // Process data when button is clicked
-            processBtn.addEventListener('click', processReconciliation);
-            exportBtn.addEventListener('click', exportResults);
+            const failedTotal = document.getElementById('failedTotal');
+            const failedCount = document.getElementById('failedCount');
+            const storedTotal = document.getElementById('storedTotal');
+            const storedCount = document.getElementById('storedCount');
+            const takenTotal = document.getElementById('takenTotal');
+            const takenCount = document.getElementById('takenCount');
+            const transactionDetails = document.getElementById('transactionDetails');
+            
+            let uploadedFiles = [];
+            let results = {
+                failed: { total: 0, count: 0, transactions: [] },
+                stored: { total: 0, count: 0, transactions: [] },
+                taken: { total: 0, count: 0, transactions: [] }
+            };
             
             // Upload area functionality
-            const sourceUploadArea = document.getElementById('sourceUploadArea');
-            const targetUploadArea = document.getElementById('targetUploadArea');
-            
-            [sourceUploadArea, targetUploadArea].forEach(area => {
-                area.addEventListener('click', function() {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = '.csv';
-                    input.addEventListener('change', function(event) {
-                        const file = event.target.files[0];
-                        if (file) {
-                            const reader = new FileReader();
-                            reader.onload = function(e) {
-                                const textArea = area === sourceUploadArea ? sourceData : targetData;
-                                textArea.value = e.target.result;
-                            };
-                            reader.readAsText(file);
-                        }
-                    });
-                    input.click();
-                });
-                
-                // Drag and drop functionality
-                area.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    area.style.borderColor = '#3498db';
-                    area.style.backgroundColor = '#f1f8ff';
-                });
-                
-                area.addEventListener('dragleave', function() {
-                    area.style.borderColor = '#dee2e6';
-                    area.style.backgroundColor = '';
-                });
-                
-                area.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    area.style.borderColor = '#dee2e6';
-                    area.style.backgroundColor = '';
-                    
-                    const file = e.dataTransfer.files[0];
-                    if (file && file.type === 'text/csv') {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const textArea = area === sourceUploadArea ? sourceData : targetData;
-                            textArea.value = e.target.result;
-                        };
-                        reader.readAsText(file);
-                    } else {
-                        alert('Silakan upload file CSV');
-                    }
-                });
+            uploadArea.addEventListener('click', function() {
+                fileInput.click();
             });
             
-            // Process reconciliation
-            function processReconciliation() {
-                try {
-                    // Parse CSV data
-                    const sourceCSV = parseCSV(sourceData.value);
-                    const targetCSV = parseCSV(targetData.value);
-                    
-                    // Update counts
-                    sourceCount.textContent = sourceCSV.length;
-                    targetCount.textContent = targetCSV.length;
-                    
-                    // Get key columns
-                    const keys = keyColumns.value.split(',');
-                    
-                    // Perform matching
-                    const { matches, sourceOnly, targetOnly } = matchData(sourceCSV, targetCSV, keys);
-                    
-                    // Update match counts
-                    matchCount.textContent = matches.length;
-                    mismatchCount.textContent = sourceOnly.length + targetOnly.length;
-                    
-                    // Display results
-                    displayResults(matches, sourceOnly, targetOnly);
-                    
-                } catch (error) {
-                    alert('Error processing data: ' + error.message);
-                    console.error(error);
+            fileInput.addEventListener('change', function(event) {
+                handleFiles(event.target.files);
+            });
+            
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--hitachi)';
+                uploadArea.style.backgroundColor = '#f0f7ff';
+            });
+            
+            uploadArea.addEventListener('dragleave', function() {
+                uploadArea.style.borderColor = '#dee2e6';
+                uploadArea.style.backgroundColor = '#f8f9fa';
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#dee2e6';
+                uploadArea.style.backgroundColor = '#f8f9fa';
+                
+                if (e.dataTransfer.files.length > 0) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+            
+            // Process button
+            processBtn.addEventListener('click', processFiles);
+            
+            // Export button
+            exportBtn.addEventListener('click', exportResults);
+            
+            // Handle uploaded files
+            function handleFiles(files) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.name.endsWith('.jrn') || file.name.endsWith('.txt')) {
+                        uploadedFiles.push(file);
+                        
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        fileItem.innerHTML = `
+                            <span class="file-name">${file.name}</span>
+                            <span class="file-size">${formatFileSize(file.size)}</span>
+                        `;
+                        fileList.appendChild(fileItem);
+                    }
+                }
+                
+                if (uploadedFiles.length > 0) {
+                    fileListContainer.classList.remove('d-none');
+                    processBtn.classList.remove('d-none');
                 }
             }
             
-            // Parse CSV string into array of objects
-            function parseCSV(csvText) {
-                const lines = csvText.trim().split('\n');
-                if (lines.length < 2) return [];
+            // Process all uploaded files
+            function processFiles() {
+                // Reset results
+                results = {
+                    failed: { total: 0, count: 0, transactions: [] },
+                    stored: { total: 0, count: 0, transactions: [] },
+                    taken: { total: 0, count: 0, transactions: [] }
+                };
                 
-                const headers = lines[0].split(',').map(h => h.trim());
+                // Show progress bar
+                progressBar.classList.remove('d-none');
+                const progressBarInner = progressBar.querySelector('.progress-bar');
                 
-                return lines.slice(1).map(line => {
-                    const values = line.split(',').map(v => v.trim());
-                    const obj = {};
-                    headers.forEach((header, i) => {
-                        obj[header] = values[i] || '';
-                    });
-                    return obj;
+                // Process each file
+                let processed = 0;
+                uploadedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const content = e.target.result;
+                        processFileContent(content, file.name);
+                        
+                        processed++;
+                        const progress = (processed / uploadedFiles.length) * 100;
+                        progressBarInner.style.width = `${progress}%`;
+                        
+                        if (processed === uploadedFiles.length) {
+                            // All files processed
+                            progressBar.classList.add('d-none');
+                            displayResults();
+                            exportBtn.classList.remove('d-none');
+                        }
+                    };
+                    reader.readAsText(file);
                 });
             }
             
-            // Match data based on key columns
-            function matchData(sourceData, targetData, keys) {
-                const matches = [];
-                const sourceOnly = [...sourceData];
-                const targetOnly = [];
+            // Process content of a single file
+            function processFileContent(content, fileName) {
+                const lines = content.split('\n');
                 
-                targetData.forEach(targetItem => {
-                    let found = false;
+                // Keywords to search for
+                const keywords = [
+                    { key: 'failed', pattern: 'Host Store: Failed' },
+                    { key: 'stored', pattern: 'Host Store: Stored' },
+                    { key: 'taken', pattern: 'Cash Taken' }
+                ];
+                
+                // Process each line
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
                     
-                    for (let i = 0; i < sourceOnly.length; i++) {
-                        const sourceItem = sourceOnly[i];
-                        let match = true;
-                        
-                        for (const key of keys) {
-                            if (sourceItem[key] !== targetItem[key]) {
-                                match = false;
-                                break;
+                    // Check if line contains any keyword
+                    for (const keyword of keywords) {
+                        if (line.includes(keyword.pattern)) {
+                            // Look for AMOUNT above this line
+                            const amount = findAmountAbove(lines, i);
+                            if (amount) {
+                                results[keyword.key].count++;
+                                results[keyword.key].total += amount;
+                                results[keyword.key].transactions.push({
+                                    file: fileName,
+                                    amount: amount,
+                                    line: i + 1
+                                });
                             }
-                        }
-                        
-                        if (match) {
-                            matches.push({
-                                source: sourceItem,
-                                target: targetItem,
-                                status: 'match'
-                            });
-                            sourceOnly.splice(i, 1);
-                            found = true;
-                            break;
+                            break; // Move to next line after finding a keyword
                         }
                     }
-                    
-                    if (!found) {
-                        targetOnly.push(targetItem);
-                    }
-                });
-                
-                return { matches, sourceOnly, targetOnly };
+                }
             }
             
-            // Display results in the table
-            function displayResults(matches, sourceOnly, targetOnly) {
-                resultsBody.innerHTML = '';
+            // Find AMOUNT value above the current line
+            function findAmountAbove(lines, currentLine) {
+                // Search upwards from current line
+                for (let i = currentLine - 1; i >= 0 && i >= currentLine - 10; i--) {
+                    if (lines[i].includes('AMOUNT')) {
+                        // Extract numeric value from amount line
+                        const amountMatch = lines[i].match(/(\d[\d.,]*)/);
+                        if (amountMatch) {
+                            // Clean and convert the amount
+                            const amountStr = amountMatch[0].replace(/\./g, '').replace(/,/g, '');
+                            return parseInt(amountStr, 10);
+                        }
+                    }
+                }
+                return null;
+            }
+            
+            // Display results
+            function displayResults() {
+                // Update totals
+                failedTotal.textContent = formatCurrency(results.failed.total);
+                failedCount.textContent = `${results.failed.count} transaksi`;
                 
-                // Add matches
-                matches.forEach(match => {
-                    const row = document.createElement('tr');
-                    row.className = 'match-true';
-                    row.innerHTML = `
-                        <td><span class="badge bg-success">Cocok</span></td>
-                        <td>${match.source.TransactionID || match.source.RefNumber || match.source.SEQ || match.source.ID}</td>
-                        <td>${match.source.Date || match.source.TransDate || match.source.TANGGAL || match.source.TransactionDate}</td>
-                        <td class="amount">${formatCurrency(match.source.Amount || match.source.TransAmount || match.source.NOMINAL || match.source.CashAmount)}</td>
-                        <td>${match.source.Branch || match.source.Location || match.source.CABANG || match.source.ATMCode || ''}</td>
-                    `;
-                    resultsBody.appendChild(row);
+                storedTotal.textContent = formatCurrency(results.stored.total);
+                storedCount.textContent = `${results.stored.count} transaksi`;
+                
+                takenTotal.textContent = formatCurrency(results.taken.total);
+                takenCount.textContent = `${results.taken.count} transaksi`;
+                
+                // Update transaction details
+                transactionDetails.innerHTML = '';
+                
+                // Add failed transactions
+                results.failed.transactions.forEach(trans => {
+                    addTransactionRow('failed', trans.file, trans.amount, trans.line);
                 });
                 
-                // Add source only (missing in target)
-                sourceOnly.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.className = 'match-false';
-                    row.innerHTML = `
-                        <td><span class="badge bg-danger">Hanya di Sumber</span></td>
-                        <td>${item.TransactionID || item.RefNumber || item.SEQ || item.ID}</td>
-                        <td>${item.Date || item.TransDate || item.TANGGAL || item.TransactionDate}</td>
-                        <td class="amount">${formatCurrency(item.Amount || item.TransAmount || item.NOMINAL || item.CashAmount)}</td>
-                        <td>${item.Branch || item.Location || item.CABANG || item.ATMCode || ''}</td>
-                    `;
-                    resultsBody.appendChild(row);
+                // Add stored transactions
+                results.stored.transactions.forEach(trans => {
+                    addTransactionRow('stored', trans.file, trans.amount, trans.line);
                 });
                 
-                // Add target only (missing in source)
-                targetOnly.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.className = 'match-false';
-                    row.innerHTML = `
-                        <td><span class="badge bg-warning text-dark">Hanya di Tujuan</span></td>
-                        <td>${item.TransactionID || item.RefNumber || item.SEQ || item.ID}</td>
-                        <td>${item.Date || item.TransDate || item.TANGGAL || item.TransactionDate}</td>
-                        <td class="amount">${formatCurrency(item.Amount || item.TransAmount || item.NOMINAL || item.CashAmount)}</td>
-                        <td>${item.Branch || item.Location || item.CABANG || item.ATMCode || ''}</td>
-                    `;
-                    resultsBody.appendChild(row);
+                // Add taken transactions
+                results.taken.transactions.forEach(trans => {
+                    addTransactionRow('taken', trans.file, trans.amount, trans.line);
                 });
             }
             
-            // Format currency
-            function formatCurrency(amount) {
-                return new Intl.NumberFormat('id-ID', {
-                    style: 'currency',
-                    currency: 'IDR',
-                    minimumFractionDigits: 0
-                }).format(amount);
+            // Add transaction row to details table
+            function addTransactionRow(type, file, amount, line) {
+                const row = document.createElement('tr');
+                
+                let typeBadge = '';
+                if (type === 'failed') {
+                    typeBadge = '<span class="badge bg-danger">Failed</span>';
+                } else if (type === 'stored') {
+                    typeBadge = '<span class="badge bg-success">Stored</span>';
+                } else if (type === 'taken') {
+                    typeBadge = '<span class="badge bg-primary">Taken</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${typeBadge}</td>
+                    <td>${file} (line: ${line})</td>
+                    <td>${formatCurrency(amount)}</td>
+                `;
+                
+                transactionDetails.appendChild(row);
             }
             
             // Export results to CSV
             function exportResults() {
-                const rows = [];
-                const header = ['Status', 'ID Transaksi', 'Tanggal', 'Jumlah', 'Lokasi'];
-                rows.push(header.join(','));
+                let csvContent = 'Jenis,File,Line,Amount\n';
                 
-                document.querySelectorAll('#resultsBody tr').forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    const rowData = [
-                        cells[0].textContent.trim(),
-                        cells[1].textContent,
-                        cells[2].textContent,
-                        cells[3].textContent.replace(/[^\d,-]/g, ''),
-                        cells[4].textContent
-                    ];
-                    rows.push(rowData.join(','));
+                // Add failed transactions
+                results.failed.transactions.forEach(trans => {
+                    csvContent += `Host Store: Failed,${trans.file},${trans.line},${trans.amount}\n`;
                 });
                 
-                const csvContent = rows.join('\n');
+                // Add stored transactions
+                results.stored.transactions.forEach(trans => {
+                    csvContent += `Host Store: Stored,${trans.file},${trans.line},${trans.amount}\n`;
+                });
+                
+                // Add taken transactions
+                results.taken.transactions.forEach(trans => {
+                    csvContent += `Cash Taken,${trans.file},${trans.line},${trans.amount}\n`;
+                });
+                
+                // Add summary
+                csvContent += '\n';
+                csvContent += `Host Store: Failed Total,,,${results.failed.total}\n`;
+                csvContent += `Host Store: Stored Total,,,${results.stored.total}\n`;
+                csvContent += `Cash Taken Total,,,${results.taken.total}\n`;
+                
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 
                 link.setAttribute('href', url);
-                link.setAttribute('download', 'hasil_rekon_ej.csv');
+                link.setAttribute('download', 'hasil_rekon_crm_hitachi.csv');
                 link.style.visibility = 'hidden';
                 
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }
+            
+            // Format file size
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' bytes';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                else return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+            
+            // Format currency
+            function formatCurrency(amount) {
+                return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
             }
         });
     </script>
