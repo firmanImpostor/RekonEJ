@@ -266,14 +266,14 @@
     <div class="container">
         <!-- Header -->
         <div class="header text-center">
-            <h1></i>Aplikasi Rekon CRM Hitachi</h1>
+            <h1><i class="fas fa-money-bill-wave me-2"></i>Aplikasi Rekon CRM Hitachi</h1>
+            <p class="lead">Rekonsiliasi File JRN/TXT untuk Transaksi ATM</p>
         </div>
 
         <!-- Instructions -->
         <div class="instructions">
             <h4><i class="fas fa-info-circle me-2"></i>Petunjuk Penggunaan</h4>
             <ol class="mb-0">
-                <li>Potong dulu EJ nya dari Periode Replanish sampai dengan (COUNTERS CLEARED)hingga periode return sampai dengan (COUNTERS CLEARED)</li>
                 <li>Upload file <span class="keyword">.jrn</span> atau <span class="keyword">.txt</span> dari CRM Hitachi (bisa multiple files)</li>
                 <li>Aplikasi akan mencari keyword: 
                     <span class="keyword">Host Store: Failed</span>, 
@@ -284,8 +284,15 @@
                     <span class="keyword">Stored Count</span>, dan
                     <span class="keyword">Dispense Count</span>
                 </li>
-               </ol>
-              </div>
+                <li>Untuk setiap keyword yang ditemukan, aplikasi akan mencari nilai amount terdekat</li>
+                <li>Contoh format amount: <span class="amount-example">AMOUNT : RP 300.000</span> atau <span class="amount-example">INIT AMOUNT: 450.000.000 IDR</span></li>
+                <li>Hasil rekonsiliasi akan menampilkan jumlah dan total nilai untuk setiap kategori</li>
+            </ol>
+            <div class="note-box">
+                <strong>Catatan:</strong> Hanya REPLENISHMENT pertama yang ditemukan yang akan diproses, nilai lainnya diabaikan.
+                Nilai lembar replenishment akan dibagi 2 sesuai instruksi.
+            </div>
+        </div>
 
         <div class="row">
             <!-- Upload Section -->
@@ -597,7 +604,7 @@
 
         <!-- Footer -->
         <div class="footer mt-4">
-            <p class="mb-0">FrederickSimarmata@gmail.com &copy; 2025 - Frederick Simarmata</p>
+            <p class="mb-0">Aplikasi Rekon CRM Hitachi &copy; 2023 - Hosting dengan GitHub Pages</p>
         </div>
     </div>
 
@@ -905,10 +912,10 @@
                         const cassette = cassetteMatch[1];
                         const denomValue = parseInt(cassetteMatch[2], 10);
                         const denomCount = parseInt(cassetteMatch[3], 10);
-
                         
                         debugContent += `✓ Ditemukan ${cassette}: Denom ${denomValue}, Count ${denomCount}\n`;
                         
+                        // Bagi nilai count menjadi 2 sesuai instruksi
                         const dividedCount = Math.floor(denomCount / 2);
                         
                         if (denomValue === 50000) {
@@ -919,7 +926,7 @@
                     }
                 }
                 
-                debugContent += `✓ Total Replenish Lembar: 50,000=${results.denom.replenish50}, 100,000=${results.denom.replenish100}\n`;
+                debugContent += `✓ Total Replenish Lembar (setelah dibagi 2): 50,000=${results.denom.replenish50}, 100,000=${results.denom.replenish100}\n`;
             }
             
             // Process Stored Count and Dispense Count for denomination counting
@@ -1137,7 +1144,7 @@
                 debugInfo.textContent += `Host Store Failed: ${formatCurrency(results.failed.total)}\n`;
                 debugInfo.textContent += `Host Store Stored: ${formatCurrency(results.stored.total)}\n`;
                 debugInfo.textContent += `Cash Taken: ${formatCurrency(results.taken.total)}\n`;
-                debugInfo.textContent += `Replenish Lembar - 50,000: ${results.denom.replenish50}, 100,000: ${results.denom.replenish100}\n`;
+                debugInfo.textContent += `Replenish Lembar (setelah dibagi 2) - 50,000: ${results.denom.replenish50}, 100,000: ${results.denom.replenish100}\n`;
                 debugInfo.textContent += `Stored Count - 50,000: ${results.denom.stored50}, 100,000: ${results.denom.stored100}\n`;
                 debugInfo.textContent += `Dispense Count - 50,000: ${results.denom.dispense50}, 100,000: ${results.denom.dispense100}\n`;
                 debugInfo.textContent += `Sisa Lembar - 50,000: ${remaining50}, 100,000: ${remaining100}\n`;
@@ -1162,7 +1169,7 @@
                 const lineInfo = initAmountLine ? `REPL: ${line}, INIT: ${initAmountLine}` : line;
                 
                 row.innerHTML = `
-                    <td>${typeBadge}</td>
+                    <td>${typeBadge</td>
                     <td>${file}</td>
                     <td>${lineInfo}</td>
                     <td>${formatCurrency(amount)}</td>
@@ -1199,7 +1206,7 @@
                 csvContent += '\n';
                 csvContent += 'DENOMINATION SUMMARY\n';
                 csvContent += 'Type,Denom 50,000,Denom 100,000\n';
-                csvContent += `Replenish Lembar,${results.denom.replenish50},${results.denom.replenish100}\n`;
+                csvContent += `Replenish Lembar (setelah dibagi 2),${results.denom.replenish50},${results.denom.replenish100}\n`;
                 csvContent += `Stored Count,${results.denom.stored50},${results.denom.stored100}\n`;
                 csvContent += `Dispense Count,${results.denom.dispense50},${results.denom.dispense100}\n`;
                 csvContent += `Sisa Lembar,${results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50},${results.denom.replenish100 + results.denom.stored100 - results.denom.dispense100}\n`;
