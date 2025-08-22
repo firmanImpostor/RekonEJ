@@ -372,7 +372,7 @@
                     </div>
                 </div>
                 
-                <!-- TID Result -->
+                <!-- TID Result
                 <div class="card result-card mt-4">
                     <div class="result-header" id="tidHeader">
                         <i class="fas fa-id-card me-2"></i>CRM TID
@@ -381,9 +381,10 @@
                         <div class="tid-value" id="tidValue">-</div>
                         <div class="result-count">ATM ID ditemukan</div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- File Content Preview -->
+                <div class="col-lg-7">
                 <div class="card mt-4 d-none" id="filePreviewCard">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Pratinjau File</h5>
@@ -395,10 +396,19 @@
                     </div>
                 </div>
             </div>
-
+        </div>
             <!-- Results Section -->
-            <div class="col-lg-7">
-                <div class="row">
+             
+            <!-- <div class="col-lg-7">
+                <div class="result-header" id="tidHeader">
+                    <i class="fas fa-id-card me-2"></i>CRM TID
+                </div>
+                <div class="result-body text-center">
+                    <div class="tid-value" id="tidValue">-</div>
+                    <div class="result-count">ATM ID ditemukan</div>
+                </div>
+            </div> -->
+                <!-- <div class="row">
                     <div class="col-md-6">
                         <div class="card result-card">
                             <div class="result-header" id="failedHeader">
@@ -508,9 +518,9 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
-                <h4 class="section-title">Sisa Lembar (Remaining)</h4>
+                <h4 class="section-title">Sisa Lembar (Remaining) TID  <span id="tidValue">-</span></h4>
                 <div class="card result-card">
                     <div class="result-header" id="remainingHeader">
                         <i class="fas fa-calculator me-2"></i>Hasil Perhitungan Sisa Lembar
@@ -549,14 +559,13 @@
                     </div>
                 </div>
             </div>
-        </div>
-
+      
         <!-- Calculation Results -->
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Hasil Perhitungan Rekonsiliasi</h5>
+                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Hasil Perhitungan Rekonsiliasi TID <span id="tidValue">-</span></h5>
                     </div>
                     <div class="card-body">
                         <table class="calculation-table">
@@ -598,7 +607,7 @@
 
                         <div class="replenish-result">
                             <i class="fas fa-check-circle me-2 text-success"></i>
-                            <span>Hasil Akhir Rekonsiliasi: </span>
+                            <span>Hasil Akhir Rekonsiliasi TID <span id="tidValue">-</span></span>
                             <span id="finalResult">Rp 0</span>
                         </div>
                     </div>
@@ -611,7 +620,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detail Transaksi</h5>
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detail Transaksi TID<span id="tidValue">-</span></h5>
                     </div>
                     <div class="card-body">
                         <div class="table-container" style="max-height: 300px; overflow-y: auto;">
@@ -639,7 +648,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Debug Information</h5>
+                        <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Debug Information TID<span id="tidValue">-</span></h5>
                     </div>
                     <div class="card-body">
                         <div id="debugInfo" class="debug-info">
@@ -654,7 +663,7 @@
         <div class="row mt-4">
             <div class="col-12">
                 <button id="exportBtn" class="btn btn-hitachi w-100 d-none">
-                    <i class="fas fa-download me-2"></i>Export Hasil ke CSV
+                    <i class="fas fa-download me-2"></i>Export Hasil ke CSV TID<span id="tidValue">-</span>
                 </button>
             </div>
         </div>
