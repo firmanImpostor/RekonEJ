@@ -9,22 +9,68 @@
     <style>
         :root {
             --hitachi: #6c5ce7;
+            --hitachi-dark: #5649c0;
             --failed: #e74c3c;
             --stored: #27ae60;
             --taken: #3498db;
             --replenish: #9b59b6;
-            --denom50: #f39c12;
-            --denom100: #8e44ad;
             --remaining: #16a085;
             --tid: #2c3e50;
         }
         
         body {
             background-color: #f8f9fa;
-            padding-top: 20px;
+            padding-top: 0;
             padding-bottom: 40px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        /* Header Megah */
+        .navbar-megah {
+            background: linear-gradient(135deg, var(--hitachi), var(--hitachi-dark));
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: white !important;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 12px;
+            font-size: 2rem;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+        }
+        
+        .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            color: white !important;
+            background-color: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+        }
+        
+        /* Konten utama */
+        .main-content {
+            margin-top: 30px;
+        }
+        
         .card {
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 20px;
@@ -32,81 +78,88 @@
             border-radius: 12px;
             transition: transform 0.2s;
         }
+        
         .card:hover {
             transform: translateY(-5px);
         }
-        .header {
-            background: linear-gradient(135deg, var(--hitachi), #3498db);
-            color: white;
-            padding: 30px 0;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
+        
         .instructions {
             background-color: #e9ecef;
             border-left: 4px solid var(--hitachi);
-            padding: 20px;
-            margin-bottom: 25px;
+            padding: 15px;
+            margin-bottom: 20px;
             border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
         }
+        
         .footer {
             margin-top: 30px;
-            padding: 20px;
+            padding: 15px;
             background-color: #343a40;
             color: white;
             text-align: center;
             border-radius: 8px;
+            font-size: 0.9rem;
         }
+        
         .btn-hitachi {
             background-color: var(--hitachi);
             border-color: var(--hitachi);
             color: white;
             font-weight: 600;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
+        
         .btn-hitachi:hover {
-            background-color: #5649c0;
-            border-color: #5649c0;
+            background-color: var(--hitachi-dark);
+            border-color: var(--hitachi-dark);
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        
         .upload-area {
             border: 2px dashed #dee2e6;
             border-radius: 12px;
-            padding: 40px 30px;
+            padding: 30px 20px;
             text-align: center;
             margin-bottom: 20px;
             cursor: pointer;
             transition: all 0.3s;
             background-color: #f8f9fa;
         }
+        
         .upload-area:hover {
             border-color: var(--hitachi);
             background-color: #f0f7ff;
             transform: translateY(-2px);
         }
+        
         .file-list {
             max-height: 200px;
             overflow-y: auto;
             margin-top: 15px;
         }
+        
         .file-item {
-            padding: 10px 15px;
+            padding: 8px 12px;
             background-color: #f1f3f5;
             border-radius: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: background-color 0.2s;
+            font-size: 0.9rem;
         }
+        
         .file-item:hover {
             background-color: #e9ecef;
         }
+        
         .file-item .file-name {
             flex-grow: 1;
             margin-right: 10px;
@@ -115,140 +168,91 @@
             white-space: nowrap;
             font-weight: 500;
         }
+        
         .result-card {
             border-radius: 12px;
             overflow: hidden;
         }
+        
         .result-header {
             color: white;
-            padding: 18px;
+            padding: 15px;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
+        
         .result-body {
-            padding: 25px;
+            padding: 20px;
         }
-        .result-value {
-            font-size: 2rem;
-            font-weight: bold;
-            text-align: center;
-            margin: 15px 0;
-            font-family: monospace;
-            color: #2c3e50;
-        }
-        .result-count {
-            text-align: center;
-            font-size: 1.1rem;
-            color: #6c757d;
-            font-weight: 500;
-        }
-        #failedHeader {
-            background-color: var(--failed);
-        }
-        #storedHeader {
-            background-color: var(--stored);
-        }
-        #takenHeader {
-            background-color: var(--taken);
-        }
-        #replenishHeader {
-            background-color: var(--replenish);
-        }
-        #denom50Header {
-            background-color: var(--denom50);
-        }
-        #denom100Header {
-            background-color: var(--denom100);
-        }
+        
         #remainingHeader {
             background-color: var(--remaining);
         }
-        #tidHeader {
-            background-color: var(--tid);
+        
+        #calculationHeader {
+            background-color: var(--hitachi);
         }
+        
         .keyword {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 6px;
             font-family: monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             background-color: #e9ecef;
             font-weight: 600;
         }
+        
         .progress {
-            height: 10px;
-            margin-bottom: 20px;
+            height: 8px;
+            margin-bottom: 15px;
             border-radius: 5px;
         }
-        .amount-example {
-            font-family: monospace;
-            background-color: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid var(--hitachi);
-            margin: 8px 0;
-        }
-        .highlight {
-            background-color: #fff3cd;
-            padding: 3px 6px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
+        
         .calculation-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 25px;
-            font-size: 0.95rem;
+            margin-top: 0;
+            font-size: 0.9rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            border-radius: 0 0 8px 8px;
             overflow: hidden;
         }
+        
         .calculation-table th, .calculation-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
+            padding: 10px 12px;
+            text-align: center;
+            border: 1px solid #dee2e6;
         }
+        
         .calculation-table th {
             background-color: #f8f9fa;
             font-weight: 600;
             color: #495057;
         }
+        
         .calculation-table tr:last-child {
             font-weight: bold;
             background-color: #e9ecef;
         }
+        
         .replenish-result {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: bold;
             text-align: center;
-            padding: 20px;
-            margin-top: 25px;
+            padding: 15px;
+            margin-top: 20px;
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-radius: 12px;
             border: 2px dashed var(--replenish);
         }
-        .bg-purple {
-            background-color: var(--replenish) !important;
-        }
+        
         .debug-info {
             font-family: monospace;
             background-color: #f8f9fa;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
             border-left: 4px solid #e74c3c;
-            margin-top: 15px;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            max-height: 300px;
-            overflow-y: auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .file-content {
-            font-family: monospace;
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #3498db;
             margin-top: 15px;
             font-size: 0.8rem;
             white-space: pre-wrap;
@@ -256,79 +260,150 @@
             overflow-y: auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .note-box {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 0 8px 8px 0;
-            font-size: 0.95rem;
-        }
-        .denom-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .denom-table th, .denom-table td {
-            padding: 12px;
-            text-align: center;
-            border: 1px solid #dee2e6;
-        }
-        .denom-table th {
+        
+        .file-content {
+            font-family: monospace;
             background-color: #f8f9fa;
-            font-weight: 600;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin-top: 15px;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        
         .remaining-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 0;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
+            border-radius: 0 0 8px 8px;
             overflow: hidden;
+            font-size: 0.9rem;
         }
+        
         .remaining-table th, .remaining-table td {
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             border: 1px solid #dee2e6;
         }
+        
         .remaining-table th {
             background-color: #f8f9fa;
             font-weight: 600;
         }
+        
         .remaining-table tr:last-child {
             font-weight: bold;
             background-color: #e9ecef;
         }
+        
         .tid-value {
-            font-size: 1.8rem;
+            font-size: 1.1rem;
             font-weight: bold;
-            text-align: center;
-            margin: 15px 0;
             font-family: monospace;
             color: #2c3e50;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            background-color: #e9ecef;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-left: 10px;
         }
+        
         .section-title {
             border-left: 4px solid var(--hitachi);
-            padding-left: 15px;
-            margin: 30px 0 20px 0;
+            padding-left: 12px;
+            margin: 25px 0 15px 0;
             font-weight: 600;
             color: #2c3e50;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
         }
+        
         .badge {
             font-weight: 500;
-            padding: 6px 10px;
+            padding: 5px 8px;
             border-radius: 6px;
+            font-size: 0.8rem;
+        }
+        
+        .card-header {
+            padding: 12px 15px;
+            font-size: 0.95rem;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+        
+        .table th, .table td {
+            padding: 8px 10px;
+            font-size: 0.9rem;
+        }
+        
+        .table thead th {
+            background-color: #f8f9fa;
+        }
+        
+        .calculation-card {
+            margin-top: 25px;
+        }
+        
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-container input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-            <!-- Instructions -->
+    <!-- Header Megah -->
+    <nav class="navbar navbar-expand-lg navbar-megah">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-calculator"></i>
+                Aplikasi Rekon CRM Hitachi
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-info-circle me-1"></i> Panduan</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-history me-1"></i> Riwayat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-cog me-1"></i> Pengaturan</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Instructions -->
         <div class="instructions">
             <h4><i class="fas fa-info-circle me-2"></i>Rekon EJ CRM Hitachi, Petunjuk Penggunaan</h4>
             <ol class="mb-0">
@@ -339,7 +414,8 @@
 
         <div class="row">
             <!-- Upload Section -->
-            <div class="col-lg-5">
+             <!-- Upload Section -->
+             <div class="col-lg-5">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Upload File</h5>
@@ -362,6 +438,7 @@
                             </div>
                         </div>
                         
+                        
                         <div class="progress d-none" id="progressBar">
                             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%"></div>
                         </div>
@@ -371,20 +448,8 @@
                         </button>
                     </div>
                 </div>
-                
-                <!-- TID Result
-                <div class="card result-card mt-4">
-                    <div class="result-header" id="tidHeader">
-                        <i class="fas fa-id-card me-2"></i>CRM TID
-                    </div>
-                    <div class="result-body text-center">
-                        <div class="tid-value" id="tidValue">-</div>
-                        <div class="result-count">ATM ID ditemukan</div>
-                    </div>
-                </div> -->
 
                 <!-- File Content Preview -->
-                <div class="col-lg-7">
                 <div class="card mt-4 d-none" id="filePreviewCard">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Pratinjau File</h5>
@@ -396,131 +461,10 @@
                     </div>
                 </div>
             </div>
-        </div>
+
             <!-- Results Section -->
-             
-            <!-- <div class="col-lg-7">
-                <div class="result-header" id="tidHeader">
-                    <i class="fas fa-id-card me-2"></i>CRM TID
-                </div>
-                <div class="result-body text-center">
-                    <div class="tid-value" id="tidValue">-</div>
-                    <div class="result-count">ATM ID ditemukan</div>
-                </div>
-            </div> -->
-                <!-- <div class="row">
-                    <div class="col-md-6">
-                        <div class="card result-card">
-                            <div class="result-header" id="failedHeader">
-                                <i class="fas fa-times-circle me-2"></i>Host Store: Failed
-                            </div>
-                            <div class="result-body">
-                                <div class="result-value" id="failedTotal">Rp 0</div>
-                                <div class="result-count" id="failedCount">0 transaksi</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card result-card">
-                            <div class="result-header" id="storedHeader">
-                                <i class="fas fa-check-circle me-2"></i>Host Store: Stored
-                            </div>
-                            <div class="result-body">
-                                <div class="result-value" id="storedTotal">Rp 0</div>
-                                <div class="result-count" id="storedCount">0 transaksi</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card result-card">
-                            <div class="result-header" id="takenHeader">
-                                <i class="fas fa-money-bill-wave me-2"></i>Cash Taken
-                            </div>
-                            <div class="result-body">
-                                <div class="result-value" id="takenTotal">Rp 0</div>
-                                <div class="result-count" id="takenCount">0 transaksi</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card result-card">
-                            <div class="result-header" id="replenishHeader">
-                                <i class="fas fa-boxes me-2"></i>Replenishment
-                            </div>
-                            <div class="result-body">
-                                <div class="result-value" id="replenishTotal">Rp 0</div>
-                                <div class="result-count" id="replenishCount">Init Amount ditemukan</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h4 class="section-title">Detail Lembar per Denominasi</h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card result-card">
-                            <div class="result-header" id="denom50Header">
-                                <i class="fas fa-money-bill me-2"></i>Denom 50,000
-                            </div>
-                            <div class="result-body">
-                                <div class="result-value" id="denom50Total">0</div>
-                                <div class="result-count" id="denom50Count">0 lembar</div>
-                                
-                                <table class="denom-table">
-                                    <tr>
-                                        <th>Sumber</th>
-                                        <th>Lembar</th>
-                                    </tr>
-                                    <tr>
-                                        <td>Replenish</td>
-                                        <td id="denom50Replenish">0</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Stored Count</td>
-                                        <td id="denom50Stored">0</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dispense Count</td>
-                                        <td id="denom50Dispense">0</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card result-card">
-                            <div class="result-header" id="denom100Header">
-                                <i class="fas fa-money-bill me-2"></i>Denom 100,000
-                            </div>
-                            <div class="result-body">
-                                <div class="result-value" id="denom100Total">0</div>
-                                <div class="result-count" id="denom100Count">0 lembar</div>
-                                
-                                <table class="denom-table">
-                                    <tr>
-                                        <th>Sumber</th>
-                                        <th>Lembar</th>
-                                    </tr>
-                                    <tr>
-                                        <td>Replenish</td>
-                                        <td id="denom100Replenish">0</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Stored Count</td>
-                                        <td id="denom100Stored">0</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Dispense Count</td>
-                                        <td id="denom100Dispense">0</td>
-                                    </tr>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-
-                <h4 class="section-title">Sisa Lembar (Remaining) TID  <span id="tidValue">-</span></h4>
+            <div class="col-lg-7">
+                <h4 class="section-title">Sisa Lembar (Remaining) <span class="tid-value" id="remainingTid">-</span></h4>
                 <div class="card result-card">
                     <div class="result-header" id="remainingHeader">
                         <i class="fas fa-calculator me-2"></i>Hasil Perhitungan Sisa Lembar
@@ -558,16 +502,13 @@
                         </table>
                     </div>
                 </div>
-            </div>
-      
-        <!-- Calculation Results -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Hasil Perhitungan Rekonsiliasi TID <span id="tidValue">-</span></h5>
+
+                <h4 class="section-title calculation-card">Hasil Perhitungan Rekonsiliasi <span class="tid-value" id="calcTid">-</span></h4>
+                <div class="card result-card">
+                    <div class="result-header" id="calculationHeader">
+                        <i class="fas fa-calculator me-2"></i>Detail Perhitungan
                     </div>
-                    <div class="card-body">
+                    <div class="result-body">
                         <table class="calculation-table">
                             <thead>
                                 <tr>
@@ -580,7 +521,7 @@
                                 <tr>
                                     <td>Init Amount (dari Replenishment)</td>
                                     <td id="calcInitAmount">Rp 0</td>
-                                    <td>Nilai awal dari INIT AMOUNT: (hanya yang pertama)</td>
+                                    <td>Jumlah RPL</td>
                                 </tr>
                                 <tr>
                                     <td>Host Store: Failed (Setor Tunai Gagal)</td>
@@ -607,7 +548,7 @@
 
                         <div class="replenish-result">
                             <i class="fas fa-check-circle me-2 text-success"></i>
-                            <span>Hasil Akhir Rekonsiliasi TID <span id="tidValue">-</span></span>
+                            <span>Hasil Akhir Rekonsiliasi: </span>
                             <span id="finalResult">Rp 0</span>
                         </div>
                     </div>
@@ -618,9 +559,10 @@
         <!-- Transaction Details -->
         <div class="row mt-4">
             <div class="col-12">
+                <h4 class="section-title">Detail Transaksi <span class="tid-value" id="detailTid">-</span></h4>
                 <div class="card">
                     <div class="card-header bg-secondary text-white">
-                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Detail Transaksi TID<span id="tidValue">-</span></h5>
+                        <h5 class="mb-0"><i class="fas fa-list me-2"></i>Daftar Transaksi</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-container" style="max-height: 300px; overflow-y: auto;">
@@ -648,7 +590,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Debug Information TID<span id="tidValue">-</span></h5>
+                        <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Debug Information</h5>
                     </div>
                     <div class="card-body">
                         <div id="debugInfo" class="debug-info">
@@ -663,7 +605,7 @@
         <div class="row mt-4">
             <div class="col-12">
                 <button id="exportBtn" class="btn btn-hitachi w-100 d-none">
-                    <i class="fas fa-download me-2"></i>Export Hasil ke CSV TID<span id="tidValue">-</span>
+                    <i class="fas fa-download me-2"></i>Export Hasil ke CSV
                 </button>
             </div>
         </div>
@@ -688,28 +630,11 @@
             const debugInfo = document.getElementById('debugInfo');
             const filePreviewCard = document.getElementById('filePreviewCard');
             const filePreview = document.getElementById('filePreview');
-            const tidValue = document.getElementById('tidValue');
             
-            const failedTotal = document.getElementById('failedTotal');
-            const failedCount = document.getElementById('failedCount');
-            const storedTotal = document.getElementById('storedTotal');
-            const storedCount = document.getElementById('storedCount');
-            const takenTotal = document.getElementById('takenTotal');
-            const takenCount = document.getElementById('takenCount');
-            const replenishTotal = document.getElementById('replenishTotal');
-            const replenishCount = document.getElementById('replenishCount');
-            
-            const denom50Total = document.getElementById('denom50Total');
-            const denom50Count = document.getElementById('denom50Count');
-            const denom50Replenish = document.getElementById('denom50Replenish');
-            const denom50Stored = document.getElementById('denom50Stored');
-            const denom50Dispense = document.getElementById('denom50Dispense');
-            
-            const denom100Total = document.getElementById('denom100Total');
-            const denom100Count = document.getElementById('denom100Count');
-            const denom100Replenish = document.getElementById('denom100Replenish');
-            const denom100Stored = document.getElementById('denom100Stored');
-            const denom100Dispense = document.getElementById('denom100Dispense');
+            // TID elements
+            const remainingTid = document.getElementById('remainingTid');
+            const calcTid = document.getElementById('calcTid');
+            const detailTid = document.getElementById('detailTid');
             
             const remaining50Replenish = document.getElementById('remaining50Replenish');
             const remaining50Stored = document.getElementById('remaining50Stored');
@@ -747,35 +672,50 @@
                 tid: null
             };
             
-            // Upload area functionality
-            uploadArea.addEventListener('click', function() {
+            // Upload area functionality - PERBAIKAN DI SINI
+            uploadArea.addEventListener('click', function(e) {
+                // Mencegah event bubbling yang mungkin mengganggu
+                e.stopPropagation();
                 fileInput.click();
             });
             
+            // PERBAIKAN: Menangani perubahan pada input file
             fileInput.addEventListener('change', function(event) {
                 // Reset previous results when new files are selected
                 resetResults();
-                handleFiles(event.target.files);
+                
+                if (event.target.files && event.target.files.length > 0) {
+                    handleFiles(event.target.files);
+                    
+                    // Reset nilai input file untuk mengizinkan upload file yang sama lagi
+                    setTimeout(() => {
+                        fileInput.value = '';
+                    }, 100);
+                }
             });
             
             // Drag and drop functionality
             uploadArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 uploadArea.style.borderColor = 'var(--hitachi)';
                 uploadArea.style.backgroundColor = '#f0f7ff';
             });
             
-            uploadArea.addEventListener('dragleave', function() {
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
                 uploadArea.style.borderColor = '#dee2e6';
                 uploadArea.style.backgroundColor = '#f8f9fa';
             });
             
             uploadArea.addEventListener('drop', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 uploadArea.style.borderColor = '#dee2e6';
                 uploadArea.style.backgroundColor = '#f8f9fa';
                 
-                if (e.dataTransfer.files.length > 0) {
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                     // Reset previous results when new files are dropped
                     resetResults();
                     handleFiles(e.dataTransfer.files);
@@ -812,29 +752,12 @@
                 processBtn.classList.add('d-none');
                 exportBtn.classList.add('d-none');
                 
+                // Reset TID values
+                remainingTid.textContent = '-';
+                calcTid.textContent = '-';
+                detailTid.textContent = '-';
+                
                 // Reset displayed values
-                failedTotal.textContent = 'Rp 0';
-                failedCount.textContent = '0 transaksi';
-                storedTotal.textContent = 'Rp 0';
-                storedCount.textContent = '0 transaksi';
-                takenTotal.textContent = 'Rp 0';
-                takenCount.textContent = '0 transaksi';
-                replenishTotal.textContent = 'Rp 0';
-                replenishCount.textContent = 'Init Amount ditemukan';
-                tidValue.textContent = '-';
-                
-                denom50Total.textContent = '0';
-                denom50Count.textContent = '0 lembar';
-                denom50Replenish.textContent = '0';
-                denom50Stored.textContent = '0';
-                denom50Dispense.textContent = '0';
-                
-                denom100Total.textContent = '0';
-                denom100Count.textContent = '0 lembar';
-                denom100Replenish.textContent = '0';
-                denom100Stored.textContent = '0';
-                denom100Dispense.textContent = '0';
-                
                 remaining50Replenish.textContent = '0';
                 remaining50Stored.textContent = '0';
                 remaining50Dispense.textContent = '0';
@@ -859,10 +782,14 @@
             // Handle uploaded files
             function handleFiles(files) {
                 uploadedFiles = []; // Reset uploaded files array
+                fileList.innerHTML = ''; // Clear file list
+                
+                let validFilesFound = false;
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     if (file.name.endsWith('.jrn') || file.name.endsWith('.txt')) {
+                        validFilesFound = true;
                         uploadedFiles.push(file);
                         
                         const fileItem = document.createElement('div');
@@ -885,9 +812,12 @@
                     }
                 }
                 
-                if (uploadedFiles.length > 0) {
+                if (validFilesFound) {
                     fileListContainer.classList.remove('d-none');
                     processBtn.classList.remove('d-none');
+                } else if (files.length > 0) {
+                    // Tampilkan pesan error jika file tidak valid
+                    alert('Hanya file dengan ekstensi .jrn atau .txt yang diperbolehkan.');
                 }
             }
             
@@ -1202,37 +1132,11 @@
             
             // Display results
             function displayResults() {
-                // Update TID
-                tidValue.textContent = results.tid || '-';
-                
-                // Update totals
-                failedTotal.textContent = formatCurrency(results.failed.total);
-                failedCount.textContent = `${results.failed.count} transaksi`;
-                
-                storedTotal.textContent = formatCurrency(results.stored.total);
-                storedCount.textContent = `${results.stored.count} transaksi`;
-                
-                takenTotal.textContent = formatCurrency(results.taken.total);
-                takenCount.textContent = `${results.taken.count} transaksi`;
-                
-                replenishTotal.textContent = formatCurrency(results.replenish.total);
-                replenishCount.textContent = `${results.replenish.count} Init Amount ditemukan`;
-                
-                // Update denomination results
-                const totalDenom50 = results.denom.replenish50 + results.denom.stored50 + results.denom.dispense50;
-                const totalDenom100 = results.denom.replenish100 + results.denom.stored100 + results.denom.dispense100;
-                
-                denom50Total.textContent = totalDenom50;
-                denom50Count.textContent = `${totalDenom50} lembar`;
-                denom50Replenish.textContent = results.denom.replenish50;
-                denom50Stored.textContent = results.denom.stored50;
-                denom50Dispense.textContent = results.denom.dispense50;
-                
-                denom100Total.textContent = totalDenom100;
-                denom100Count.textContent = `${totalDenom100} lembar`;
-                denom100Replenish.textContent = results.denom.replenish100;
-                denom100Stored.textContent = results.denom.stored100;
-                denom100Dispense.textContent = results.denom.dispense100;
+                // Update TID values
+                const tid = results.tid || '-';
+                remainingTid.textContent = tid;
+                calcTid.textContent = tid;
+                detailTid.textContent = tid;
                 
                 // Update remaining results
                 const remaining50 = results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50;
@@ -1362,7 +1266,7 @@
                 
                 // Add summary
                 csvContent += '\n';
-                csvContent += `REPLENISHMENT Total,,,${results.replenish.total}\n`;
+                csvContent += `REplenishment Total,,,${results.replenish.total}\n`;
                 csvContent += `Host Store: Failed Total,,,${results.failed.total}\n`;
                 csvContent += `Host Store: Stored Total,,,${results.stored.total}\n`;
                 csvContent += `Cash Taken Total,,,${results.taken.total}\n`;
