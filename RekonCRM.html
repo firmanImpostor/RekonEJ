@@ -16,6 +16,7 @@
             --replenish: #9b59b6;
             --remaining: #16a085;
             --tid: #2c3e50;
+            --cctv: #e67e22;
         }
         
         body {
@@ -370,6 +371,60 @@
             height: 100%;
             cursor: pointer;
         }
+        
+        /* CCTV Table Styles */
+        .cctv-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+        
+        .cctv-table th, .cctv-table td {
+            padding: 8px 10px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        
+        .cctv-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .cctv-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .cctv-table tr:hover {
+            background-color: #f1f3f5;
+        }
+        
+        .cctv-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+        
+        .badge-replenishment {
+            background-color: var(--replenish);
+            color: white;
+        }
+        
+        .badge-door {
+            background-color: var(--cctv);
+            color: white;
+        }
+        
+        .badge-power {
+            background-color: var(--tid);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -386,7 +441,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="https://firmanimpostor.github.io/RekonEj/"><i class="fas fa-home me-1"></i> Rekon Wincore </a>
+                        <a class="nav-link active" href="https://firmanimpostor.github.io/RekonEj/"><i class="fas fa-home me-1"></i> Gracela </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#"><i class="fas fa-info-circle me-1"></i> Panduan</a>
@@ -585,6 +640,36 @@
             </div>
         </div>
 
+        <!-- CCTV Request Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h4 class="section-title">Permintaan CCTV <span class="tid-value" id="cctvTid">-</span></h4>
+                <div class="card">
+                    <div class="card-header" style="background-color: var(--cctv); color: white;">
+                        <h5 class="mb-0"><i class="fas fa-video me-2"></i>Daftar CCTV yang Diminta</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                            <table class="cctv-table">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Jenis</th>
+                                        <th>File</th>
+                                        <th>Line</th>
+                                        <th>Detail</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cctvDetails">
+                                    <!-- CCTV details will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Debug Info -->
         <div class="row mt-4">
             <div class="col-12">
@@ -635,6 +720,7 @@
             const remainingTid = document.getElementById('remainingTid');
             const calcTid = document.getElementById('calcTid');
             const detailTid = document.getElementById('detailTid');
+            const cctvTid = document.getElementById('cctvTid');
             
             const remaining50Replenish = document.getElementById('remaining50Replenish');
             const remaining50Stored = document.getElementById('remaining50Stored');
@@ -654,6 +740,7 @@
             const finalResult = document.getElementById('finalResult');
             
             const transactionDetails = document.getElementById('transactionDetails');
+            const cctvDetails = document.getElementById('cctvDetails');
             
             let uploadedFiles = [];
             let results = {
@@ -668,6 +755,11 @@
                     stored100: 0,
                     dispense50: 0,
                     dispense100: 0
+                },
+                cctv: {
+                    replenishment: [],
+                    door: [],
+                    power: []
                 },
                 tid: null
             };
@@ -751,6 +843,11 @@
                         dispense50: 0,
                         dispense100: 0
                     },
+                    cctv: {
+                        replenishment: [],
+                        door: [],
+                        power: []
+                    },
                     tid: null
                 };
                 
@@ -764,6 +861,7 @@
                 remainingTid.textContent = '-';
                 calcTid.textContent = '-';
                 detailTid.textContent = '-';
+                cctvTid.textContent = '-';
                 
                 // Reset displayed values
                 remaining50Replenish.textContent = '0';
@@ -784,6 +882,7 @@
                 finalResult.textContent = 'Rp 0';
                 
                 transactionDetails.innerHTML = '';
+                cctvDetails.innerHTML = '';
                 debugInfo.textContent = 'Debug information will appear here after processing...';
             }
             
@@ -973,6 +1072,9 @@
                 // Process Stored Count and Dispense Count for denomination counting
                 processDenomCounts(lines, fileName, debugContent);
                 
+                // Process CCTV keywords (REPLENISHMENT, Door, Power Up)
+                processCCTVEvents(lines, fileName, debugContent);
+                
                 // Update debug info
                 debugInfo.textContent += debugContent;
             }
@@ -1068,6 +1170,77 @@
                 }
             }
             
+            // Process CCTV events (REPLENISHMENT, Door, Power Up)
+            function processCCTVEvents(lines, fileName, debugContent) {
+                debugContent += `\n✓ Mencari event untuk CCTV...\n`;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    
+                    // Process REPLENISHMENT events
+                    if (line.includes('REPLENISHMENT')) {
+                        // Extract timestamp if available
+                        const timestamp = extractTimestamp(line);
+                        
+                        results.cctv.replenishment.push({
+                            file: fileName,
+                            line: i + 1,
+                            timestamp: timestamp,
+                            detail: line.trim()
+                        });
+                        
+                        debugContent += `✓ Ditemukan REPLENISHMENT untuk CCTV di baris ${i+1}\n`;
+                    }
+                    
+                    // Process Door events
+                    else if (line.includes('Door')) {
+                        // Extract timestamp if available
+                        const timestamp = extractTimestamp(line);
+                        
+                        results.cctv.door.push({
+                            file: fileName,
+                            line: i + 1,
+                            timestamp: timestamp,
+                            detail: line.trim()
+                        });
+                        
+                        debugContent += `✓ Ditemukan Door event untuk CCTV di baris ${i+1}\n`;
+                    }
+                    
+                    // Process Power Up events
+                    else if (line.includes('Power Up') || line.includes('Power-up') || line.includes('PowerOn')) {
+                        // Extract timestamp if available
+                        const timestamp = extractTimestamp(line);
+                        
+                        results.cctv.power.push({
+                            file: fileName,
+                            line: i + 1,
+                            timestamp: timestamp,
+                            detail: line.trim()
+                        });
+                        
+                        debugContent += `✓ Ditemukan Power Up event untuk CCTV di baris ${i+1}\n`;
+                    }
+                }
+            }
+            
+            // Extract timestamp from a line
+            function extractTimestamp(line) {
+                // Look for patterns like [2023/10/15 14:30:25] or similar
+                const timestampMatch = line.match(/(\d{2,4}[\/\-]\d{1,2}[\/\-]\d{1,2}[\sT]\d{1,2}:\d{1,2}:\d{1,2})/);
+                if (timestampMatch) {
+                    return timestampMatch[0];
+                }
+                
+                // Alternative pattern for other timestamp formats
+                const altTimestampMatch = line.match(/(\d{1,2}:\d{1,2}:\d{1,2})/);
+                if (altTimestampMatch) {
+                    return altTimestampMatch[0];
+                }
+                
+                return 'Waktu tidak ditemukan';
+            }
+            
             // Find AMOUNT value above the current line
             function findAmountAbove(lines, currentLine) {
                 // Search upwards from current line
@@ -1149,6 +1322,7 @@
                 remainingTid.textContent = tid;
                 calcTid.textContent = tid;
                 detailTid.textContent = tid;
+                cctvTid.textContent = tid;
                 
                 // Update remaining results
                 const remaining50 = results.denom.replenish50 + results.denom.stored50 - results.denom.dispense50;
@@ -1198,6 +1372,9 @@
                     addTransactionRow('taken', trans.file, trans.amount, trans.line);
                 });
                 
+                // Update CCTV details
+                updateCCTVDetails();
+                
                 // Update debug info with final results
                 debugInfo.textContent += `\n=== HASIL AKHIR ===\n`;
                 debugInfo.textContent += `ATM ID: ${results.tid || 'Tidak ditemukan'}\n`;
@@ -1210,6 +1387,53 @@
                 debugInfo.textContent += `Dispense Count - 50,000: ${results.denom.dispense50}, 100,000: ${results.denom.dispense100}\n`;
                 debugInfo.textContent += `Sisa Lembar - 50,000: ${remaining50}, 100,000: ${remaining100}\n`;
                 debugInfo.textContent += `Hasil Rekonsiliasi: ${formatCurrency(finalAmount)}\n`;
+                debugInfo.textContent += `Jumlah CCTV REPLENISHMENT: ${results.cctv.replenishment.length}\n`;
+                debugInfo.textContent += `Jumlah CCTV Door: ${results.cctv.door.length}\n`;
+                debugInfo.textContent += `Jumlah CCTV Power: ${results.cctv.power.length}\n`;
+            }
+            
+            // Update CCTV details table
+            function updateCCTVDetails() {
+                cctvDetails.innerHTML = '';
+                
+                // Add REPLENISHMENT events
+                results.cctv.replenishment.forEach(event => {
+                    addCCTVRow('replenishment', event.file, event.line, event.timestamp, event.detail);
+                });
+                
+                // Add Door events
+                results.cctv.door.forEach(event => {
+                    addCCTVRow('door', event.file, event.line, event.timestamp, event.detail);
+                });
+                
+                // Add Power events
+                results.cctv.power.forEach(event => {
+                    addCCTVRow('power', event.file, event.line, event.timestamp, event.detail);
+                });
+            }
+            
+            // Add CCTV row to details table
+            function addCCTVRow(type, file, line, timestamp, detail) {
+                const row = document.createElement('tr');
+                
+                let typeBadge = '';
+                if (type === 'replenishment') {
+                    typeBadge = '<span class="cctv-badge badge-replenishment">REPLENISHMENT</span>';
+                } else if (type === 'door') {
+                    typeBadge = '<span class="cctv-badge badge-door">DOOR</span>';
+                } else if (type === 'power') {
+                    typeBadge = '<span class="cctv-badge badge-power">POWER</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${timestamp}</td>
+                    <td>${typeBadge}</td>
+                    <td>${file}</td>
+                    <td>${line}</td>
+                    <td>${detail}</td>
+                `;
+                
+                cctvDetails.appendChild(row);
             }
             
             // Add transaction row to details table
@@ -1283,6 +1507,26 @@
                 csvContent += `Host Store: Stored Total,,,${results.stored.total}\n`;
                 csvContent += `Cash Taken Total,,,${results.taken.total}\n`;
                 csvContent += `Final Result,,,${results.replenish.total + results.failed.total + results.stored.total - results.taken.total}\n`;
+                
+                // Add CCTV events
+                csvContent += '\n';
+                csvContent += 'CCTV EVENTS\n';
+                csvContent += 'Type,File,Line,Timestamp,Detail\n';
+                
+                // Add REPLENISHMENT events
+                results.cctv.replenishment.forEach(event => {
+                    csvContent += `REPLENISHMENT,${event.file},${event.line},${event.timestamp},${event.detail}\n`;
+                });
+                
+                // Add Door events
+                results.cctv.door.forEach(event => {
+                    csvContent += `DOOR,${event.file},${event.line},${event.timestamp},${event.detail}\n`;
+                });
+                
+                // Add Power events
+                results.cctv.power.forEach(event => {
+                    csvContent += `POWER,${event.file},${event.line},${event.timestamp},${event.detail}\n`;
+                });
                 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
