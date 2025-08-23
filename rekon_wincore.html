@@ -6,7 +6,6 @@
     <title>Aplikasi Rekon EJ Wincore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-
         :root {
             --primary-color: #2563eb;
             --secondary-color: #3b82f6;
@@ -14,6 +13,8 @@
             --light-color: #f8fafc;
             --dark-color: #1e293b;
             --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
             --sidebar-width: 250px;
         }
         
@@ -181,6 +182,7 @@
         .upload-text h3 {
             margin-bottom: 8px;
             color: var(--dark-color);
+            font-size: 1.2rem;
         }
         
         .upload-text p {
@@ -340,6 +342,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             background: white;
+            margin-bottom: 20px;
         }
         
         table {
@@ -366,6 +369,32 @@
         .total-row {
             font-weight: bold;
             background: #f1f5f9;
+        }
+        
+        /* CCTV Table */
+        .cctv-table th {
+            background: var(--warning-color);
+        }
+        
+        .cctv-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .badge-door {
+            background-color: #8b5cf6;
+        }
+        
+        .badge-power {
+            background-color: #f97316;
+        }
+        
+        .badge-clear {
+            background-color: var(--info-color);
         }
         
         /* Footer */
@@ -406,6 +435,15 @@
             .addcash-inputs {
                 grid-template-columns: 1fr 1fr;
             }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
@@ -441,14 +479,20 @@
         <div class="main-content">
             <div class="header">
                 <h1>Rekon EJ Wincore</h1>
-        
-            <h4><i class="fas fa-info-circle me-2"></i>Petunjuk Penggunaan</h4>
-            <ol class="mb-0">
-                <li>Potong EJ Periode RPL dari CLEAR CASH Hingga Periode Return CLEAR CASH </li>
-                <li>Upload file <span class="keyword">.jrn</span> atau <span class="keyword">.txt</span> dari Wincore (bisa multiple files)</li>
-             <li>Isi Addcash Per-kasetnya Manual, baru klik Proses File, Export CSV jika ingin detal transaksinya atau ingin dibuat form Rekon RDI </li>   
-            </ol>
-          </div>
+                <div class="user-info">
+                    <div class="user-avatar">OP</div>
+                    <span>Operator</span>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h4><i class="fas fa-info-circle me-2"></i>Petunjuk Penggunaan</h4>
+                <ol class="mb-0">
+                    <li>Potong EJ Periode RPL dari CLEAR CASH Hingga Periode Return CLEAR CASH</li>
+                    <li>Upload file <span class="keyword">.jrn</span> atau <span class="keyword">.txt</span> dari Wincore (bisa multiple files)</li>
+                    <li>Isi Addcash Per-kasetnya Manual, baru klik Proses File, Export CSV jika ingin detail transaksinya atau ingin dibuat form Rekon RDI</li>
+                </ol>
+            </div>
 
             <!-- Upload Card -->
             <div class="card">
@@ -569,6 +613,32 @@
                 </div>
             </div>
 
+            <!-- CCTV Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-video"></i>
+                        <span>Permintaan CCTV</span>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="cctvTable" class="cctv-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Nama File</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" style="text-align: center;">Belum ada data CCTV</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="footer">
                 <p>Aplikasi Rekon EJ Wincore &copy; 2023</p>
             </div>
@@ -583,6 +653,7 @@
         let addcashData = { kaset1: 0, kaset2: 0, kaset3: 0, kaset4: 0 };
         let dispensedData = { kaset1: 0, kaset2: 0, kaset3: 0, kaset4: 0 };
         let transactionDetails = [];
+        let cctvEvents = [];
         
         // Inisialisasi event listeners saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
@@ -722,6 +793,7 @@
             addcashData = { kaset1: 0, kaset2: 0, kaset3: 0, kaset4: 0 };
             dispensedData = { kaset1: 0, kaset2: 0, kaset3: 0, kaset4: 0 };
             transactionDetails = [];
+            cctvEvents = [];
             
             document.getElementById('tidValue').textContent = "-";
             document.getElementById('addcashInput1').value = "0";
@@ -733,6 +805,9 @@
             
             const tbody = document.querySelector('#resultsTable tbody');
             tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Belum ada data</td></tr>';
+            
+            const cctvTbody = document.querySelector('#cctvTable tbody');
+            cctvTbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Belum ada data CCTV</td></tr>';
             
             displayFileList();
         }
@@ -750,6 +825,7 @@
                 denomData = { kaset1: 0, kaset2: 0, kaset3: 0, kaset4: 0 };
                 dispensedData = { kaset1: 0, kaset2: 0, kaset3: 0, kaset4: 0 };
                 transactionDetails = [];
+                cctvEvents = [];
                 
                 // Ekstrak TID ATM dari file pertama
                 await extractTidAtm(uploadedFiles[0]);
@@ -762,8 +838,14 @@
                     await extractDispensedData(file);
                 }
                 
+                // Ekstrak data CCTV dari semua file
+                for (const file of uploadedFiles) {
+                    await extractCCTVData(file);
+                }
+                
                 // Tampilkan hasil
                 displayResults();
+                displayCCTVResults();
                 
             } catch (error) {
                 alert('Terjadi kesalahan saat memproses file: ' + error.message);
@@ -848,6 +930,46 @@
                     }
                 }
             }
+        }
+        
+        // Fungsi untuk mengekstrak data CCTV (CLEAR CASH, Door, dan Power Up)
+        async function extractCCTVData(file) {
+            const content = await readFileContent(file);
+            const lines = content.split('\n');
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const lineLower = line.toLowerCase();
+                
+                // Cari baris yang mengandung kata "CLEAR CASH" (case insensitive)
+                if (lineLower.includes('clear cash')) {
+                    cctvEvents.push({
+                        file: removeFileExtension(file.name),
+                        keterangan: line.trim()
+                    });
+                }
+                
+                // Cari baris yang mengandung kata "Door" (case insensitive)
+                if (lineLower.includes('door')) {
+                    cctvEvents.push({
+                        file: removeFileExtension(file.name),
+                        keterangan: line.trim()
+                    });
+                }
+                
+                // Cari baris yang mengandung kata "Power Up" atau "Power-up" (case insensitive)
+                if (lineLower.includes('power up') || lineLower.includes('power-up')) {
+                    cctvEvents.push({
+                        file: removeFileExtension(file.name),
+                        keterangan: line.trim()
+                    });
+                }
+            }
+        }
+        
+        // Fungsi untuk menghapus ekstensi file
+        function removeFileExtension(filename) {
+            return filename.replace(/\.(txt|jrn)$/i, '');
         }
         
         // Fungsi untuk membaca konten file
@@ -939,20 +1061,59 @@
             document.getElementById('totalRupiah').textContent = totalRupiah.toLocaleString('id-ID');
         }
         
-        // Fungsi untuk export ke CSV
-        function exportToCSV() {
-            if (transactionDetails.length === 0) {
-                alert('Tidak ada data transaksi untuk diexport!');
+        // Fungsi untuk menampilkan hasil CCTV
+        function displayCCTVResults() {
+            const tbody = document.querySelector('#cctvTable tbody');
+            tbody.innerHTML = '';
+            
+            if (cctvEvents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center;">Tidak ditemukan data CLEAR CASH, Door atau Power Up</td></tr>';
                 return;
             }
             
-            // Buat header CSV
-            let csvContent = "Kategori,Denom,Jumlah Lembar,Rupiah Transaksi\n";
-            
-            // Tambahkan data transaksi
-            transactionDetails.forEach(transaction => {
-                csvContent += `${transaction.kategori},${transaction.denom},${transaction.jumlahLembar},${transaction.rupiahTransaksi}\n`;
+            cctvEvents.forEach((event, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${event.file}</td>
+                    <td>${event.keterangan}</td>
+                `;
+                
+                tbody.appendChild(row);
             });
+        }
+        
+        // Fungsi untuk export ke CSV
+        function exportToCSV() {
+            if (transactionDetails.length === 0 && cctvEvents.length === 0) {
+                alert('Tidak ada data untuk diexport!');
+                return;
+            }
+            
+            let csvContent = "";
+            
+            // Tambahkan data transaksi jika ada
+            if (transactionDetails.length > 0) {
+                csvContent += "DATA TRANSAKSI\n";
+                csvContent += "Kategori,Denom,Jumlah Lembar,Rupiah Transaksi\n";
+                
+                transactionDetails.forEach(transaction => {
+                    csvContent += `${transaction.kategori},${transaction.denom},${transaction.jumlahLembar},${transaction.rupiahTransaksi}\n`;
+                });
+                
+                csvContent += "\n";
+            }
+            
+            // Tambahkan data CCTV jika ada
+            if (cctvEvents.length > 0) {
+                csvContent += "DATA CCTV\n";
+                csvContent += "Nama File,Keterangan\n";
+                
+                cctvEvents.forEach(event => {
+                    csvContent += `${event.file},"${event.keterangan.replace(/"/g, '""')}"\n`;
+                });
+            }
             
             // Buat nama file dengan format TID_tanggal_TransaksiEjLog.csv
             const now = new Date();
