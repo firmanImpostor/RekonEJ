@@ -723,8 +723,16 @@
             });
             
             // Process button
-            processBtn.addEventListener('click', processFiles);
+          // Process button
+        processBtn.addEventListener('click', function() {
+            // Nonaktifkan tombol setelah diklik
+            processBtn.disabled = true;
+            processBtn.innerHTML = '<i class="fas fa-cog fa-spin me-2"></i>Sedang Memproses...';
             
+            // Jalankan proses file
+            processFiles();
+        });
+        
             // Export button
             exportBtn.addEventListener('click', exportResults);
             
@@ -784,6 +792,10 @@
                 uploadedFiles = []; // Reset uploaded files array
                 fileList.innerHTML = ''; // Clear file list
                 
+                 // Aktifkan kembali tombol proses ketika file baru diupload
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<i class="fas fa-cogs me-2"></i>Proses Rekonsiliasi';
+            
                 let validFilesFound = false;
                 
                 for (let i = 0; i < files.length; i++) {
